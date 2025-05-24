@@ -21,7 +21,7 @@ import {
   ReferenceLine,
   Area,
 } from "recharts";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
 const GlucoseMonitor = () => {

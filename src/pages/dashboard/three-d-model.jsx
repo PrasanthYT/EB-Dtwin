@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Info, AlertCircle, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 
 // Sample medical conditions with NIH node names
 const MEDICAL_CONDITIONS = [

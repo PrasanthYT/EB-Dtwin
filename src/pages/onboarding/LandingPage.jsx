@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Progress } from "../ui/progress"; // Assuming this is your progress bar component
+import { Progress } from "@/components/ui/progress"; // Assuming this is your progress bar component
 
 // Onboarding Screens Data (Updated with colors)
 const onboardingScreens = [
