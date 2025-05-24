@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -6,6 +5,13 @@ import {
 } from "react-router-dom";
 import SignUp from "./pages/auth/SignUp";
 import SignIn from "./pages/auth/SignIn";
+import HealthGoals from "./pages/onboarding/health-goal";
+import HealthGenders from "./pages/onboarding/health-gender";
+import WeightSelector from "./pages/onboarding/health-weight";
+import AgeSelector from "./pages/onboarding/health-age";
+import ScrollableMedicationSelection from "./pages/onboarding/health-medications";
+import HealthSymptoms from "./pages/onboarding/health-symptoms";
+import HealthSetup from "./pages/onboarding/health-setup";
 
 // // ✅ PublicRoute to prevent signed-in users from accessing auth pages
 // const PublicRoute = ({ children }) => {
@@ -38,7 +44,7 @@ const App = () => {
   return (
     <Router>
       <Routes>
-       <Route path="/" element={<SignUp/>} />
+       <Route path="/" element={<HealthSetup />} />
        <Route path="/signin" element={<SignIn/>} />
       </Routes>
     </Router>
