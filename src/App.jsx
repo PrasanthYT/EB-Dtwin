@@ -12,6 +12,10 @@ import AgeSelector from "./pages/onboarding/health-age";
 import ScrollableMedicationSelection from "./pages/onboarding/health-medications";
 import HealthSymptoms from "./pages/onboarding/health-symptoms";
 import HealthSetup from "./pages/onboarding/health-setup";
+import HealthDashboard from "./pages/Dashboard";
+import HeartDetailedReport from "./pages/dashboard/heart-detailed-report";
+import GutDetailedReport from "./pages/dashboard/gut-detailed-report";
+import PancreasDetailedReport from "./pages/dashboard/pancreas-detailed-report";
 
 // // ✅ PublicRoute to prevent signed-in users from accessing auth pages
 // const PublicRoute = ({ children }) => {
@@ -44,7 +48,7 @@ const App = () => {
   return (
     <Router>
       <Routes>
-       <Route path="/" element={<HealthSetup />} />
+       <Route path="/" element={<PancreasDetailedReport />} />
        <Route path="/signin" element={<SignIn/>} />
       </Routes>
     </Router>

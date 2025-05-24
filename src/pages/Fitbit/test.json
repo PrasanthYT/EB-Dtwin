@@ -1,0 +1,109 @@
+{
+  "data": {
+      "profile": {
+          "age": 20,
+          "ambassador": false,
+          "autoStrideEnabled": true,
+          "avatar": "https://static0.fitbit.com/images/profile/defaultProfile_100.png",
+          "avatar150": "https://static0.fitbit.com/images/profile/defaultProfile_150.png",
+          "displayName": "jaya v.",
+          "gender": "MALE",
+          "height": 173,
+          "weight": 0
+      },
+      "_id": "67a73f9e3d2e2e2e154fd568",
+      "userId": "2403092437",
+      "weeklyData": [
+          {
+              "date": "2025-02-14",
+              "activity": {
+                  "summary": {
+                      "caloriesOut": 3620,
+                      "activityCalories": 2264,
+                      "caloriesBMR": 1720,
+                      "activeScore": -1,
+                      "steps": 12569,
+                      "sedentaryMinutes": 936,
+                      "lightlyActiveMinutes": 382,
+                      "fairlyActiveMinutes": 49,
+                      "veryActiveMinutes": 43,
+                      "distances": [
+                          {
+                              "activity": "total",
+                              "distance": 8.7458
+                          },
+                          {
+                              "activity": "tracker",
+                              "distance": 8.7458
+                          },
+                          {
+                              "activity": "sedentaryActive",
+                              "distance": 0.0015
+                          },
+                          {
+                              "activity": "lightlyActive",
+                              "distance": 4.4414
+                          },
+                          {
+                              "activity": "moderatelyActive",
+                              "distance": 3.3071
+                          },
+                          {
+                              "activity": "veryActive",
+                              "distance": 0.9958
+                          },
+                          {
+                              "activity": "loggedActivities",
+                              "distance": 0
+                          }
+                      ],
+                      "marginalCalories": 1618,
+                      "restingHeartRate": 74,
+                      "heartRateZones": [
+                          {
+                              "minutes": 1416,
+                              "caloriesOut": 3464.1553139999996,
+                              "name": "Out of Range",
+                              "min": 30,
+                              "max": 123
+                          },
+                          {
+                              "minutes": 21,
+                              "caloriesOut": 141.97154400000002,
+                              "name": "Fat Burn",
+                              "min": 124,
+                              "max": 148
+                          },
+                          {
+                              "minutes": 3,
+                              "caloriesOut": 14.271614999999999,
+                              "name": "Cardio",
+                              "min": 149,
+                              "max": 180
+                          },
+                          {
+                              "minutes": 0,
+                              "caloriesOut": 0,
+                              "name": "Peak",
+                              "min": 181,
+                              "max": 220
+                          }
+                      ]
+                  }
+              },
+              "heartRate": [
+                  {
+                      "_id": "67af84bc13e51cb9701c1e46"
+                  }
+              ],
+              "sleep": {
+                  "sleepRecords": []
+              },
+              "_id": "67af84bc13e51cb9701c1e45"
+          }
+      ],
+      "createdAt": "2025-02-08T11:27:26.102Z",
+      "updatedAt": "2025-02-14T18:00:28.062Z",
+      "__v": 15
+  }
+}
