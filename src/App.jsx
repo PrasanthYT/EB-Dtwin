@@ -48,7 +48,7 @@ const App = () => {
   return (
     <Router>
       <Routes>
-       <Route path="/" element={<PancreasDetailedReport />} />
+       <Route path="/" element={<HealthDashboard />} />
        <Route path="/signin" element={<SignIn/>} />
       </Routes>
     </Router>
