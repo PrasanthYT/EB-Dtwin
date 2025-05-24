@@ -17,12 +17,12 @@ export default function SignIn() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:4200/api/auth/login", {
+      const response = await fetch("http://localhost:4000/api/users/email/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username: email, password }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
@@ -32,9 +32,9 @@ export default function SignIn() {
       }
 
       toast.success("Login successful!");
-      
+      console.log("Login successful:", data.access);
       // Save token or user info in localStorage/sessionStorage if needed
-      sessionStorage.setItem("token", data.token);
+      sessionStorage.setItem("token", data.data.accessToken);
 
       setEmail("");
       setPassword("");
