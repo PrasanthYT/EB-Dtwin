@@ -30,6 +30,8 @@ import BodySimulator from "./pages/Simulation";
 import HealthVisualizationApp from "./pages/dashboard/three-d-model";
 import AISuggestionsPage from "./pages/dashboard/ai-suggestions-page";
 import FoodSection from "./pages/dashboard/food-section";
+import BottomNav from "./pages/dashboard/bottom-nav";
+import FoodScanner from "./pages/dashboard/food-scanner";
 
 // ✅ PublicRoute to prevent signed-in users from accessing auth pages
 // const PublicRoute = ({ children }) => {
@@ -62,7 +64,13 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<AISuggestionsPage/>}/>
+        {/* Your existing routes */}
+        <Route path="/" element={<BottomNav />} />
+        
+        {/* Add this route for the food scanner */}
+        <Route path="/foodscan" element={<FoodScanner />} />
+        
+        {/* Other routes */}
       </Routes>
     </Router>
   );

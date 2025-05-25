@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Home, BarChart2, Camera, Sparkles, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Card } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";  
 import { Link } from "react-router-dom";
 
 const BottomNav = () => {
