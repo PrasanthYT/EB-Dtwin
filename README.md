@@ -15,10 +15,9 @@ Dtwin is an AI-powered, full-stack health management application designed to del
 
 ## 📸 App Screenshots
 
-## 📸 App Screenshots
 
-| 🫀 Heart Analytics | 🤖 AI Insights | 🩺 Disease Prediction |
-|:-----------:|:-------------------:|:------------:|:-------------------:|
+| 🫀 Heart Analytics | 🤖 AI Insights | 🩺 Disease Prediction |   |
+|:---------------:|:----------------:|:----------------------:|:-:|
 | ![](./public/screenshots/5.jpg) | ![](./public/screenshots/2.jpg) | ![](./public/screenshots/4.jpg) |
 
 | 📊 Recovery Dashboard | 🔎 Gut Analysis | 📈 Health Overview |   |
