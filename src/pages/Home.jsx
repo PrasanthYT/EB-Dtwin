@@ -1,19 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-import HealthGenders from "../components/onboarding/health-gender";
-import HealthGoals from "../components/onboarding/health-goal";
-import HealthWeight from "../components/onboarding/health-weight";
-import HealthAge from "../components/onboarding/health-age";
-import HealthBloodFGroup from "../components/onboarding/health-blood-group";
-import HealthFitness from "../components/onboarding/health-fitness";
-import HealthSleepLevel from "../components/onboarding/health-sleeplevel";
-import HealthMedication from "../components/onboarding/health-medications";
-import HealthSymptoms from "../components/onboarding/health-symptoms";
-import HealthSetup from "../components/onboarding/health-setup";
-import HealthAvatar from "../components/onboarding/health-avatar";
-import HealthLoading from "../components/onboarding/health-loading";
-import HealthText from "../components/onboarding/health-text";
+import HealthGenders from "../pages/onboarding/health-gender";
+import HealthGoals from "../pages/onboarding/health-goal";
+import HealthWeight from "../pages/onboarding/health-weight";
+import HealthAge from "../pages/onboarding/health-age";
+import HealthMedication from "../pages/onboarding/health-medications";
+import HealthSymptoms from "../pages/onboarding/health-symptoms";
+import HealthSetup from "../pages/onboarding/health-setup";
+import HealthAvatar from "../pages/onboarding/health-avatar";
+import HealthLoading from "../pages/onboarding/health-loading";
 
 function Home({ markOnboardingComplete }) {
   const [currentStep, setCurrentStep] = useState(0);
