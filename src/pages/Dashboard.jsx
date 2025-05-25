@@ -29,7 +29,7 @@ import BottomNav from "./dashboard/bottom-nav";
 import HealthSimulation from "./dashboard/health-simulation";
 import ModelVisualizationCard from "./dashboard/health-threeD-twin";
 
-const HealthDashboard = () => {
+const   HealthDashboard = () => {
   const navigate = useNavigate();
 
   // ** State for User & Fitbit Data **
@@ -251,11 +251,14 @@ const HealthDashboard = () => {
   // ** Handle Navigation **
   const handleWellnessAI = () => navigate("/wellnessai");
   const handleSearchBar = () => navigate("/search");
-
+  const handleNavigateDP = () => navigate("/diseaseprediction");
+  const handleChatBotLink = () => navigate("/chatbot");
   const handleHeartRate = () => navigate("/heartratemonitor");
+  const handleBodyRecoveryAnalytics = () => navigate("/body-recovery");
   const handleHealthScore = () => navigate("/healthscore");
   const handleAddMeds = () => navigate("/addmeds");
   const handleHealthBloodSugar = () => navigate("/healthbloodsugar");
+  const handleGutHealthLink = () => navigate("/guthealth");
 
   const handleRemoveMed = async (medication) => {
     try {
@@ -365,7 +368,7 @@ const HealthDashboard = () => {
             {/* Innovative Staggered Grid Layout */}
             <div className="grid grid-cols-2 gap-4">
               {/* Disease Prediction - Large Card */}
-              <Card className="col-span-2 bg-gradient-to-br from-red-50 to-red-100 border border-red-200 p-6 rounded-3xl hover:shadow-xl hover:border-red-300 hover:-translate-y-1 transition-all duration-300 cursor-pointer group relative overflow-hidden">
+              <Card onClick={handleNavigateDP} className="col-span-2 bg-gradient-to-br from-red-50 to-red-100 border border-red-200 p-6 rounded-3xl hover:shadow-xl hover:border-red-300 hover:-translate-y-1 transition-all duration-300 cursor-pointer group relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-20 h-20 bg-red-200/30 rounded-full -translate-y-10 translate-x-10"></div>
                 <div className="absolute bottom-0 left-0 w-16 h-16 bg-red-300/20 rounded-full translate-y-8 -translate-x-8"></div>
                 <div className="relative z-10">
@@ -402,7 +405,7 @@ const HealthDashboard = () => {
               </Card>
 
               {/* Gut Health */}
-              <Card className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 p-5 rounded-2xl hover:shadow-lg hover:border-green-300 hover:-translate-y-1 transition-all duration-300 cursor-pointer group relative overflow-hidden">
+              <Card onClick={handleGutHealthLink} className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 p-5 rounded-2xl hover:shadow-lg hover:border-green-300 hover:-translate-y-1 transition-all duration-300 cursor-pointer group relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-16 h-16 bg-green-200/30 rounded-full -translate-y-8 translate-x-8"></div>
                 <div className="relative z-10">
                   <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-md">
@@ -426,7 +429,7 @@ const HealthDashboard = () => {
               </Card>
 
               {/* Mental Chatbot */}
-              <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 p-5 rounded-2xl hover:shadow-lg hover:border-blue-300 hover:-translate-y-1 transition-all duration-300 cursor-pointer group relative overflow-hidden">
+              <Card onClick={handleChatBotLink} className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 p-5 rounded-2xl hover:shadow-lg hover:border-blue-300 hover:-translate-y-1 transition-all duration-300 cursor-pointer group relative overflow-hidden">
                 <div className="absolute bottom-0 left-0 w-16 h-16 bg-blue-200/30 rounded-full translate-y-8 -translate-x-8"></div>
                 <div className="relative z-10">
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-md">
@@ -458,7 +461,7 @@ const HealthDashboard = () => {
               </Card>
 
               {/* Body Recovery Graph */}
-              <Card className="col-span-2 bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 p-5 rounded-2xl hover:shadow-lg hover:border-orange-300 hover:-translate-y-1 transition-all duration-300 cursor-pointer group relative overflow-hidden">
+              <Card onClick={handleBodyRecoveryAnalytics} className="col-span-2 bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 p-5 rounded-2xl hover:shadow-lg hover:border-orange-300 hover:-translate-y-1 transition-all duration-300 cursor-pointer group relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-orange-200/20 rounded-full -translate-y-12 translate-x-12"></div>
                 <div className="relative z-10">
                   <div className="flex items-center justify-between mb-3">

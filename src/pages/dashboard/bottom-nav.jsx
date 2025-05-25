@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Home, BarChart2, Camera, Sparkles, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Card } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";  
 import { Link } from "react-router-dom";
 
 const BottomNav = () => {
@@ -11,7 +11,7 @@ const BottomNav = () => {
   const navItems = [
     { id: "home", icon: Home, label: "Home", path: "/dashboard" },
     { id: "stats", icon: BarChart2, label: "Stats", path: "/analytics" },
-    { id: "food", icon: Sparkles, label: "Food", path: "/healthsuggestion" },
+    { id: "food", icon: Sparkles, label: "Food", path: "/foodmodule" },
     { id: "settings", icon: Settings, label: "Settings", path: "/settings" }
   ];
 
