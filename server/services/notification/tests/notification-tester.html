@@ -1,0 +1,1995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Di-Twin Notification Tester</title>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --dark-color: #2d3748;
+            --light-color: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            margin: 0;
+            font-size: 18px;
+            color: var(--dark-color);
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-connected {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        input[type="text"], 
+        input[type="number"],
+        select, 
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #3551d1;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .notification-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            padding: 10px;
+            border-left: 3px solid var(--primary-color);
+            background-color: #f8f9fa;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .notification-title {
+            font-weight: bold;
+            color: var(--dark-color);
+        }
+
+        .notification-time {
+            font-size: 12px;
+            color: #777;
+        }
+
+        .notification-body {
+            color: #555;
+        }
+
+        .notification-data {
+            margin-top: 5px;
+            font-size: 12px;
+            font-family: monospace;
+            background-color: #eee;
+            padding: 5px;
+            border-radius: 3px;
+            white-space: pre-wrap;
+        }
+
+        .log-area {
+            height: 200px;
+            overflow-y: auto;
+            background-color: #1e1e1e;
+            color: #ddd;
+            font-family: monospace;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+
+        .log-info {
+            color: #6bb9f0;
+        }
+
+        .log-error {
+            color: #ff7979;
+        }
+
+        .log-success {
+            color: #2ecc71;
+        }
+
+        .log-warning {
+            color: #f39c12;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-right: 5px;
+        }
+
+        .tag-websocket {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+        }
+
+        .tag-fcm {
+            background-color: #ffebee;
+            color: #b71c1c;
+        }
+
+        .tag-info {
+            background-color: #e0f7fa;
+            color: #006064;
+        }
+
+        .statistics-card {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 15px 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 5px 0;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #777;
+        }
+
+        .tabbed-card .tabs {
+            display: flex;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+        }
+
+        .tabbed-card .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            color: #777;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tabbed-card .tab.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .tabbed-card .tab-content {
+            display: none;
+        }
+
+        .tabbed-card .tab-content.active {
+            display: block;
+        }
+
+        .troubleshooting {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .troubleshooting h3 {
+            margin-top: 0;
+            color: #e65100;
+        }
+        
+        .troubleshooting pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        
+        .code-command {
+            display: inline-block;
+            font-family: monospace;
+            background-color: #f5f5f5;
+            padding: 3px 6px;
+            border-radius: 3px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Di-Twin Notification Tester</h1>
+            <p>Debug and test notification functionality</p>
+        </header>
+        
+        <!-- Troubleshooting section -->
+        <div class="troubleshooting">
+            <h3>FCM Troubleshooting Guide</h3>
+            <p>Firebase Cloud Messaging requires a service worker file at the root of your domain. If you see service worker errors:</p>
+            <ol>
+                <li><strong>Download the service worker file:</strong> 
+                    <button id="download-sw-file" style="display: inline-block; margin-left: 10px;">Download firebase-messaging-sw.js</button>
+                </li>
+                <li><strong>Place the file</strong> at the root of your web server</li>
+                <li><strong>Use localhost, not IP address:</strong> FCM only works on localhost or HTTPS sites, not on IP addresses like 127.0.0.1</li>
+                <li><strong>Check the browser console:</strong> Look for error messages related to service worker registration</li>
+                <li><strong>Verify file access:</strong> Make sure you can directly access <span class="code-command">/firebase-messaging-sw.js</span> in your browser</li>
+            </ol>
+        </div>
+
+        <div class="dashboard">
+            <!-- Connection Panel -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Connection</h2>
+                    <span id="connection-status" class="status status-disconnected">Disconnected</span>
+                </div>
+                <div class="form-group">
+                    <label for="server-url">Server URL</label>
+                    <input type="text" id="server-url" value="http://localhost:4000" />
+                </div>
+                <div class="form-group">
+                    <label for="user-id">User ID</label>
+                    <input type="text" id="user-id" placeholder="Enter user ID" />
+                </div>
+                <div class="button-group">
+                    <button id="connect-button">Connect</button>
+                    <button id="disconnect-button" disabled>Disconnect</button>
+                    <button id="check-connection" disabled>Check Connection</button>
+                </div>
+            </div>
+
+            <!-- FCM Panel -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">FCM Configuration</h2>
+                    <span id="fcm-status" class="status status-disconnected">Not Registered</span>
+                </div>
+                <div class="form-group">
+                    <label for="fcm-token">FCM Token</label>
+                    <input type="text" id="fcm-token" placeholder="Enter FCM token or generate mock" />
+                </div>
+                <div class="button-group">
+                    <button id="generate-token">Generate Mock Token</button>
+                    <button id="get-firebase-token">Get Firebase Token</button>
+                    <button id="register-token">Register Token</button>
+                </div>
+            </div>
+
+            <!-- Test Notifications -->
+            <div class="card tabbed-card">
+                <div class="card-header">
+                    <h2 class="card-title">Send Test Notification</h2>
+                </div>
+                <div class="tabs">
+                    <div class="tab active" data-tab="standard">Standard</div>
+                    <div class="tab" data-tab="custom">Custom</div>
+                    <div class="tab" data-tab="predefined">Predefined</div>
+                </div>
+
+                <!-- Standard Notification Tab -->
+                <div class="tab-content active" id="standard-tab">
+                    <div class="form-group">
+                        <label for="notification-title">Title</label>
+                        <input type="text" id="notification-title" value="Test Notification" />
+                    </div>
+                    <div class="form-group">
+                        <label for="notification-message">Message</label>
+                        <textarea id="notification-message">This is a test notification from the debug tool.</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="notification-type">Type</label>
+                        <select id="notification-type">
+                            <option value="test">Test</option>
+                            <option value="medication">Medication</option>
+                            <option value="meal">Meal</option>
+                            <option value="activity">Activity</option>
+                            <option value="health-check">Health Check</option>
+                        </select>
+                    </div>
+                    <div class="button-group">
+                        <button id="send-test-notification">Send FCM Notification</button>
+                        <button id="send-test-socket-notification">Send Socket Notification</button>
+                    </div>
+                </div>
+
+                <!-- Custom Notification Tab -->
+                <div class="tab-content" id="custom-tab">
+                    <div class="form-group">
+                        <label for="custom-notification-payload">Notification Payload (JSON)</label>
+                        <textarea id="custom-notification-payload">{
+  "title": "Custom Notification",
+  "message": "This is a custom notification",
+  "type": "custom",
+  "data": {
+    "customField": "customValue",
+    "numericValue": "42",
+    "booleanValue": "true",
+    "timestamp": "1682540327000"
+  }
+}</textarea>
+                    </div>
+                    <button id="send-custom-notification">Send Custom Notification</button>
+                </div>
+
+                <!-- Predefined Notifications Tab -->
+                <div class="tab-content" id="predefined-tab">
+                    <div class="form-group">
+                        <label for="predefined-notification">Select Predefined Notification</label>
+                        <select id="predefined-notification">
+                            <option value="medication">Medication Reminder</option>
+                            <option value="meal">Meal Reminder</option>
+                            <option value="activity">Activity Alert</option>
+                            <option value="appointment">Appointment Reminder</option>
+                        </select>
+                    </div>
+                    <div id="predefined-notification-details" class="notification-data">
+                        Select a notification type to see details
+                    </div>
+                    <button id="send-predefined-notification">Send Predefined Notification</button>
+                </div>
+            </div>
+
+            <!-- Notification Log -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Notification Log</h2>
+                    <button id="clear-notifications">Clear</button>
+                </div>
+                <div class="notification-list" id="notification-list">
+                    <div class="notification-item">
+                        <div class="notification-header">
+                            <span class="notification-title">Welcome</span>
+                            <span class="notification-time">Just now</span>
+                        </div>
+                        <div class="notification-body">
+                            Connect to a server to see notifications here.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Statistics</h2>
+                    <button id="refresh-stats">Refresh</button>
+                </div>
+                <div class="statistics-card">
+                    <div class="stat-box">
+                        <div class="stat-value" id="stats-total-notifications">0</div>
+                        <div class="stat-label">Notifications</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="stats-ws-notifications">0</div>
+                        <div class="stat-label">WebSocket</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="stats-fcm-notifications">0</div>
+                        <div class="stat-label">FCM</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="stats-errors">0</div>
+                        <div class="stat-label">Errors</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Debug Log -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Debug Log</h2>
+                    <div class="button-group">
+                        <button id="clear-logs">Clear</button>
+                        <button id="download-logs">Download</button>
+                    </div>
+                </div>
+                <div class="log-area" id="debug-log"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Socket.IO client script -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    
+    <!-- Firebase App is always required and must be first -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
+    
+    <!-- App script -->
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDuKIj8vPuYujWdbfPVkyYQie9FerBwiCY",
+            authDomain: "di-twin.firebaseapp.com",
+            projectId: "di-twin",
+            storageBucket: "di-twin.firebasestorage.app",
+            messagingSenderId: "235797705732",
+            appId: "1:235797705732:web:ebac0839cad13ba17f3151",
+            measurementId: "G-64SEMKFMSG"
+        };
+
+        // VAPID key for web push
+        const vapidKey = "BN0Lb2VOhtuepE6leN_xTq5GqyoiNXoT-NnA-_nHcpouuaQVWSUdpUygBPnO47jRP8z9DPaYAqA4oMS7MEw_e1A";
+
+        // Initialize Firebase
+        let messaging = null;
+        try {
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+            
+            // Check if messaging is supported in this browser
+            if (firebase.messaging.isSupported()) {
+                messaging = firebase.messaging();
+                console.log('Firebase Messaging is supported in this browser');
+            } else {
+                console.error('Firebase Messaging is not supported in this browser');
+            }
+        } catch (error) {
+            console.error("Error initializing Firebase:", error);
+        }
+
+        // Global variables
+        let socket = null;
+        let userId = null;
+        let fcmToken = null;
+        let authToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YzRmOWNiZi03M2VlLTQ0ZmItYWMyMS1hZmFmYzQxZDA3YjkiLCJtb2JpbGUiOiIrOTE3ODQyOTAwMTU1IiwiaWF0IjoxNzQ1ODAwODgwLCJleHAiOjE3NDU4MDQ0ODB9.MqY-AddY6K3jn1tCZyflmJ1aJirMxOTxKDv8arcntls";
+        let serverUrl = '';
+        let isConnected = false;
+        let lastFcmSentTime = null; // Track FCM rate limiting
+        
+        // Statistics tracking
+        const stats = {
+            totalNotifications: 0,
+            wsNotifications: 0,
+            fcmNotifications: 0,
+            errors: 0
+        };
+
+        // Predefined notifications
+        const predefinedNotifications = {
+            medication: {
+                title: 'Medication Reminder 💊',
+                message: 'Time to take Aspirin (100mg)',
+                type: 'medication',
+                data: {
+                    medicationId: 'med_123456',
+                    medicationName: 'Aspirin',
+                    dosage: '100mg',
+                    scheduledTime: '08:30'
+                }
+            },
+            meal: {
+                title: 'Breakfast Time 🍳',
+                message: "It's time for your breakfast",
+                type: 'meal',
+                data: {
+                    mealType: 'breakfast',
+                    scheduledTime: '08:00',
+                    suggestions: ['Oatmeal', 'Eggs', 'Fruit']
+                }
+            },
+            activity: {
+                title: 'Activity Reminder 🏃‍♂️',
+                message: "You've been inactive for 3 hours. Time to move!",
+                type: 'activity',
+                data: {
+                    inactiveHours: 3,
+                    lastActivityAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString()
+                }
+            },
+            appointment: {
+                title: 'Health Check Reminder 🏥',
+                message: 'Reminder for your cardiology check at 14:30',
+                type: 'health-check',
+                data: {
+                    checkType: 'cardiology',
+                    appointmentTime: '2023-11-15T14:30:00Z',
+                    doctor: 'Dr. Smith',
+                    location: 'Medical Center, Room 305'
+                }
+            }
+        };
+
+        // Track sent notification IDs to prevent duplicates
+        const sentNotifications = new Set();
+        const NOTIFICATION_EXPIRY_MS = 1000 * 60 * 10; // 10 minutes
+
+        // Global notification tracking to prevent duplicates across the entire app
+        const recentNotifications = new Map();
+        const NOTIFICATION_DEDUP_WINDOW = 60000; // Increase to 60 seconds window to deduplicate
+
+        // DOM Elements
+        const elements = {
+            // Connection panel
+            serverUrl: document.getElementById('server-url'),
+            userId: document.getElementById('user-id'),
+            connectionStatus: document.getElementById('connection-status'),
+            connectButton: document.getElementById('connect-button'),
+            disconnectButton: document.getElementById('disconnect-button'),
+            checkConnectionButton: document.getElementById('check-connection'),
+            
+            // FCM panel
+            fcmToken: document.getElementById('fcm-token'),
+            fcmStatus: document.getElementById('fcm-status'),
+            generateTokenButton: document.getElementById('generate-token'),
+            getFirebaseTokenButton: document.getElementById('get-firebase-token'),
+            registerTokenButton: document.getElementById('register-token'),
+            
+            // Standard notification tab
+            notificationTitle: document.getElementById('notification-title'),
+            notificationMessage: document.getElementById('notification-message'),
+            notificationType: document.getElementById('notification-type'),
+            sendTestNotificationButton: document.getElementById('send-test-notification'),
+            
+            // Custom notification tab
+            customNotificationPayload: document.getElementById('custom-notification-payload'),
+            sendCustomNotificationButton: document.getElementById('send-custom-notification'),
+            
+            // Predefined notification tab
+            predefinedNotification: document.getElementById('predefined-notification'),
+            predefinedNotificationDetails: document.getElementById('predefined-notification-details'),
+            sendPredefinedNotificationButton: document.getElementById('send-predefined-notification'),
+            
+            // New socket notification button
+            sendTestSocketNotificationButton: document.getElementById('send-test-socket-notification'),
+            
+            // Notification log
+            notificationList: document.getElementById('notification-list'),
+            clearNotificationsButton: document.getElementById('clear-notifications'),
+            
+            // Statistics
+            statsTotal: document.getElementById('stats-total-notifications'),
+            statsWs: document.getElementById('stats-ws-notifications'),
+            statsFcm: document.getElementById('stats-fcm-notifications'),
+            statsErrors: document.getElementById('stats-errors'),
+            refreshStatsButton: document.getElementById('refresh-stats'),
+            
+            // Debug log
+            debugLog: document.getElementById('debug-log'),
+            clearLogsButton: document.getElementById('clear-logs'),
+            downloadLogsButton: document.getElementById('download-logs'),
+            
+            // Tabs
+            tabs: document.querySelectorAll('.tab'),
+            tabContents: document.querySelectorAll('.tab-content')
+        };
+
+        // Initialize tab system
+        elements.tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.getAttribute('data-tab');
+                
+                // Remove active class from all tabs and contents
+                elements.tabs.forEach(t => t.classList.remove('active'));
+                elements.tabContents.forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab and its content
+                tab.classList.add('active');
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+            });
+        });
+
+        // Initialize predefined notification dropdown
+        elements.predefinedNotification.addEventListener('change', () => {
+            const selected = elements.predefinedNotification.value;
+            const notification = predefinedNotifications[selected];
+            elements.predefinedNotificationDetails.textContent = JSON.stringify(notification, null, 2);
+        });
+
+        // Helper functions
+        function updateConnectionStatus(connected) {
+            isConnected = connected;
+            elements.connectionStatus.textContent = connected ? 'Connected' : 'Disconnected';
+            elements.connectionStatus.className = connected ? 'status status-connected' : 'status status-disconnected';
+            elements.connectButton.disabled = connected;
+            elements.disconnectButton.disabled = !connected;
+            elements.checkConnectionButton.disabled = !connected;
+            
+            if (connected) {
+                logInfo('WebSocket connection established', 'websocket');
+            } else {
+                logInfo('WebSocket disconnected', 'websocket');
+            }
+        }
+
+        function updateFcmStatus(registered) {
+            elements.fcmStatus.textContent = registered ? 'Registered' : 'Not Registered';
+            elements.fcmStatus.className = registered ? 'status status-connected' : 'status status-disconnected';
+            
+            if (registered) {
+                logInfo('FCM token registered', 'fcm');
+            }
+        }
+
+        function updateStats() {
+            elements.statsTotal.textContent = stats.totalNotifications;
+            elements.statsWs.textContent = stats.wsNotifications;
+            elements.statsFcm.textContent = stats.fcmNotifications;
+            elements.statsErrors.textContent = stats.errors;
+        }
+
+        function logInfo(message, type = 'info') {
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry log-info';
+            
+            const timestamp = new Date().toISOString();
+            
+            let tagHtml = '';
+            if (type === 'websocket') {
+                tagHtml = '<span class="tag tag-websocket">WebSocket</span>';
+            } else if (type === 'fcm') {
+                tagHtml = '<span class="tag tag-fcm">FCM</span>';
+            } else if (type === 'info') {
+                tagHtml = '<span class="tag tag-info">Info</span>';
+            }
+            
+            logEntry.innerHTML = `[${timestamp.slice(11, 19)}] ${tagHtml} ${message}`;
+            elements.debugLog.appendChild(logEntry);
+            elements.debugLog.scrollTop = elements.debugLog.scrollHeight;
+        }
+
+        function logError(message, error = null) {
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry log-error';
+            
+            const timestamp = new Date().toISOString();
+            
+            let errorDetails = '';
+            if (error) {
+                errorDetails = `: ${error.message || error}`;
+                if (error.stack) {
+                    errorDetails += `\n${error.stack}`;
+                }
+            }
+            
+            logEntry.innerHTML = `[${timestamp.slice(11, 19)}] <span class="tag">Error</span> ${message}${errorDetails}`;
+            elements.debugLog.appendChild(logEntry);
+            elements.debugLog.scrollTop = elements.debugLog.scrollHeight;
+            
+            stats.errors++;
+            updateStats();
+        }
+
+        function logSuccess(message) {
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry log-success';
+            
+            const timestamp = new Date().toISOString();
+            
+            logEntry.innerHTML = `[${timestamp.slice(11, 19)}] <span class="tag">Success</span> ${message}`;
+            elements.debugLog.appendChild(logEntry);
+            elements.debugLog.scrollTop = elements.debugLog.scrollHeight;
+        }
+
+        function logWarning(message) {
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry log-warning';
+            
+            const timestamp = new Date().toISOString();
+            
+            logEntry.innerHTML = `[${timestamp.slice(11, 19)}] <span class="tag">Warning</span> ${message}`;
+            elements.debugLog.appendChild(logEntry);
+            elements.debugLog.scrollTop = elements.debugLog.scrollHeight;
+        }
+
+        function addNotification(notification, source = 'websocket') {
+            const notificationItem = document.createElement('div');
+            notificationItem.className = 'notification-item';
+            
+            // Format the timestamp or use current time
+            const timestamp = notification.timestamp 
+                ? new Date(notification.timestamp)
+                : new Date();
+            
+            const timeFormatted = timestamp.toLocaleTimeString();
+            
+            notificationItem.innerHTML = `
+                <div class="notification-header">
+                    <span class="notification-title">${notification.title || 'No Title'}</span>
+                    <span class="notification-time">${timeFormatted}</span>
+                </div>
+                <div class="notification-body">
+                    ${notification.message || 'No Message'}
+                </div>
+                <div class="notification-data">
+                    Type: ${notification.type || 'unknown'}<br>
+                    Source: ${source}<br>
+                    ${notification.data ? `Data: ${JSON.stringify(notification.data, null, 2)}` : ''}
+                </div>
+            `;
+            
+            elements.notificationList.prepend(notificationItem);
+            
+            // Update stats
+            stats.totalNotifications++;
+            if (source === 'websocket') {
+                stats.wsNotifications++;
+            } else if (source === 'fcm') {
+                stats.fcmNotifications++;
+            }
+            
+            updateStats();
+        }
+
+        function generateMockFcmToken() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+            let token = '';
+            
+            // Generate a 152-character token (similar to FCM token length)
+            for (let i = 0; i < 152; i++) {
+                token += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            
+            return token;
+        }
+
+        // Connect to WebSocket server
+        function connectWebSocket() {
+            // Validate inputs
+            serverUrl = elements.serverUrl.value.trim();
+            userId = elements.userId.value.trim();
+            
+            if (!serverUrl) {
+                logError('Server URL is required');
+                return;
+            }
+            
+            if (!userId) {
+                logError('User ID is required');
+                return;
+            }
+            
+            logInfo(`Connecting to ${serverUrl} with user ID: ${userId}`, 'websocket');
+            
+            try {
+                // Disconnect existing socket if any
+                if (socket) {
+                    socket.disconnect();
+                }
+                
+                // Create new socket connection
+                socket = io(serverUrl, {
+                    transports: ['websocket'],
+                    auth: { userId }
+                });
+                
+                // Set up event listeners
+                socket.on('connect', () => {
+                    updateConnectionStatus(true);
+                    logSuccess(`Connected with socket ID: ${socket.id}`);
+                });
+                
+                socket.on('disconnect', () => {
+                    updateConnectionStatus(false);
+                });
+                
+                socket.on('connect_error', (error) => {
+                    logError('Connection error', error);
+                    updateConnectionStatus(false);
+                });
+                
+                socket.on('error', (error) => {
+                    logError('Socket error', error);
+                });
+                
+                // Handle incoming notifications
+                socket.on('notification', (notification) => {
+                    logInfo(`Received notification via WebSocket: ${notification.title || notification.data?.title || 'Untitled'}`, 'websocket');
+                    
+                    // Ensure notification has title and message for display
+                    const processedNotification = {
+                        title: notification.title || notification.data?.title || 'Untitled Notification',
+                        message: notification.message || notification.body || notification.data?.message || notification.data?.body || '',
+                        type: notification.type || notification.data?.type || 'unknown',
+                        data: notification.data || {},
+                        timestamp: notification.timestamp || new Date().toISOString(),
+                        id: notification.id || `ws-${Date.now()}`,
+                        source: 'websocket'
+                    };
+                    
+                    // Log the raw notification for debugging
+                    console.log('Raw WebSocket notification:', notification);
+                    
+                    // Add notification to UI
+                    addNotification(processedNotification, 'websocket');
+                    
+                    // Create browser notification if permission granted
+                    if (Notification.permission === 'granted') {
+                        // Avoid duplicates
+                        const id = notification.id || `ws-${Date.now()}`;
+                        if (!hasRecentlyShown(id)) {
+                            trackNotification(id);
+                            
+                            const notif = new Notification(processedNotification.title, {
+                                body: processedNotification.message,
+                                icon: '/favicon.ico'
+                            });
+                            
+                            notif.onclick = () => {
+                                window.focus();
+                                notif.close();
+                            };
+                        }
+                    }
+                });
+                
+                // Additional events can be added here
+            } catch (error) {
+                logError('Failed to connect', error);
+                updateConnectionStatus(false);
+            }
+        }
+
+        // Disconnect from WebSocket server
+        function disconnectWebSocket() {
+            if (socket) {
+                socket.disconnect();
+                socket = null;
+                updateConnectionStatus(false);
+            }
+        }
+
+        // Request permission and get FCM token from Firebase
+        async function getFirebaseToken() {
+            if (!messaging) {
+                logError('Firebase Messaging not initialized or not supported in this browser');
+                logWarning('FCM may not be supported in this browser. Try Chrome or Firefox.');
+                return;
+            }
+
+            try {
+                logInfo('Requesting notification permission...', 'fcm');
+                
+                // Check if permission was already denied
+                if (Notification.permission === 'denied') {
+                    logError('Notification permission was previously denied by the browser');
+                    logWarning('Please reset notification permissions for this site in your browser settings and try again');
+                    
+                    // Show instructions for different browsers
+                    const instructions = document.createElement('div');
+                    instructions.className = 'notification-item';
+                    instructions.innerHTML = `
+                        <div class="notification-header">
+                            <span class="notification-title">How to enable notifications</span>
+                        </div>
+                        <div class="notification-body">
+                            <strong>Chrome:</strong> Click the lock icon in the address bar > Site settings > Notifications > Allow<br>
+                            <strong>Firefox:</strong> Click the lock icon > Permissions > Notifications > Allow<br>
+                            <strong>Edge:</strong> Click the lock icon > Permissions > Notifications > Allow<br>
+                            <strong>Safari:</strong> Safari menu > Preferences > Websites > Notifications > Allow for this site
+                        </div>
+                    `;
+                    elements.notificationList.prepend(instructions);
+                    return;
+                }
+                
+                // Request permission in a way that's more likely to succeed
+                let permission;
+                try {
+                    // Try the modern Promise-based API
+                    permission = await Notification.requestPermission();
+                } catch (error) {
+                    // If Promise-based API fails, try callback-based API
+                    permission = await new Promise((resolve) => {
+                        Notification.requestPermission(resolve);
+                    });
+                }
+                
+                if (permission !== 'granted') {
+                    logError('Notification permission denied. You need to allow notifications to receive FCM messages.');
+                    return;
+                }
+                
+                logSuccess('Notification permission granted');
+                
+                // Get Firebase messaging registration token
+                try {
+                    logInfo('Getting FCM token...', 'fcm');
+                    logInfo('Using Firebase project ID: ' + firebaseConfig.projectId, 'fcm');
+                    logInfo('Using messagingSenderId: ' + firebaseConfig.messagingSenderId, 'fcm');
+                    
+                    // Make sure service worker is registered before getting token
+                    const swRegistered = await registerServiceWorker();
+                    
+                    if (!swRegistered) {
+                        // Try to use mock token since real FCM won't work without service worker
+                        logWarning('Using mock FCM token since service worker registration failed');
+                        const mockToken = generateMockFcmToken();
+                        elements.fcmToken.value = mockToken + ' (MOCK)';
+                        fcmToken = mockToken;
+                        
+                        // Show a helpful message about using mock tokens
+                        const mockInstruction = document.createElement('div');
+                        mockInstruction.className = 'notification-item';
+                        mockInstruction.innerHTML = `
+                            <div class="notification-header">
+                                <span class="notification-title">Using Mock FCM Token</span>
+                            </div>
+                            <div class="notification-body">
+                                <p>A mock token has been generated since the Firebase service worker couldn't be registered.</p>
+                                <p>This token can be used for testing backend token storage, but won't receive real FCM messages.</p>
+                                <p>For real FCM messages to work:</p>
+                                <ol>
+                                    <li>Copy <code>firebase-messaging-sw.js</code> from the tests directory to the root of your web server</li>
+                                    <li>Visit your site over HTTPS or localhost (not 127.0.0.1)</li>
+                                    <li>Try again after clearing your browser cache</li>
+                                </ol>
+                            </div>
+                        `;
+                        elements.notificationList.prepend(mockInstruction);
+                        
+                        if (isConnected) {
+                            await registerFcmToken();
+                        }
+                        return;
+                    }
+                    
+                    // Get token with vapid key
+                    logInfo('Requesting FCM token with VAPID key: ' + vapidKey.substring(0, 20) + '...', 'fcm');
+                    
+                    // Wait for service worker to be fully activated
+                    logInfo('Waiting for service worker to be fully activated...', 'fcm');
+                    await navigator.serviceWorker.ready;
+                    logInfo('Service worker is ready', 'fcm');
+                    
+                    const token = await messaging.getToken({
+                        vapidKey: vapidKey
+                    });
+                    
+                    if (!token) {
+                        logError('No FCM token was generated');
+                        return;
+                    }
+                    
+                    elements.fcmToken.value = token;
+                    fcmToken = token;
+                    logSuccess('FCM token obtained successfully');
+                    logInfo('Token: ' + token.substring(0, 15) + '...', 'fcm');
+                    
+                    // Try to register token automatically
+                    if (isConnected) {
+                        await registerFcmToken();
+                    }
+                    
+                } catch (error) {
+                    logError('Error getting FCM token', error);
+                    console.error('Detailed FCM error:', error);
+                    
+                    // Provide additional guidance based on the error
+                    if (error.code === 'messaging/failed-service-worker-registration') {
+                        logWarning('FCM requires a working service worker at the root of your domain');
+                        logInfo('Using an HTTP server like "http-server ." or "python -m http.server" in the root directory can help');
+                    } else if (error.code === 'messaging/token-subscribe-failed') {
+                        logWarning('Authentication problem with FCM. Check your Firebase project settings and VAPID key');
+                        logInfo('Verify that Web Push is enabled in your Firebase Console and the VAPID key is correct');
+                        
+                        // Try with mock token as fallback
+                        logWarning('Using mock FCM token as fallback due to authentication error');
+                        const mockToken = generateMockFcmToken();
+                        elements.fcmToken.value = mockToken + ' (MOCK-AUTH-ERROR)';
+                        fcmToken = mockToken;
+                        
+                        if (isConnected) {
+                            await registerFcmToken();
+                        }
+                    }
+                }
+            } catch (error) {
+                logError('Error setting up Firebase notifications', error);
+                console.error('Detailed Firebase error:', error);
+            }
+        }
+        
+        // Register the service worker for FCM
+        async function registerServiceWorker() {
+            if (!('serviceWorker' in navigator)) {
+                logError('Service Worker not supported in this browser');
+                return false;
+            }
+            
+            try {
+                // For FCM, the service worker MUST be at the root path
+                const swPath = '/firebase-messaging-sw.js';
+                logInfo(`Attempting to register Service Worker from: ${swPath}`, 'fcm');
+                
+                try {
+                    // Register the service worker
+                    const registration = await navigator.serviceWorker.register(swPath, {
+                        scope: '/'
+                    });
+                    
+                    logInfo(`Service Worker registered with scope: ${registration.scope}`, 'fcm');
+                    return true;
+                } catch (error) {
+                    // If registration fails, likely the SW isn't at the root - show helpful message
+                    logError('Service Worker registration failed', error);
+                    logError('Important: firebase-messaging-sw.js MUST be at the root of your site');
+                    logWarning('You need to copy Back-End/services/notification/tests/firebase-messaging-sw.js to your web server root');
+                    
+                    // Add troubleshooting info
+                    const instructions = document.createElement('div');
+                    instructions.className = 'notification-item';
+                    instructions.innerHTML = `
+                        <div class="notification-header">
+                            <span class="notification-title">Firebase Service Worker Error</span>
+                        </div>
+                        <div class="notification-body">
+                            <p><strong>Problem:</strong> Firebase Messaging can't find the service worker at: <code>${window.location.origin}/firebase-messaging-sw.js</code></p>
+                            <p><strong>Solution:</strong></p>
+                            <ol>
+                                <li>Copy <code>firebase-messaging-sw.js</code> from the tests directory to the root of your web server</li>
+                                <li>Make sure the file is accessible at: <code>${window.location.origin}/firebase-messaging-sw.js</code></li>
+                                <li>If using a development server like live-server, restart it after copying the file</li>
+                            </ol>
+                        </div>
+                    `;
+                    elements.notificationList.prepend(instructions);
+                    
+                    return false;
+                }
+            } catch (error) {
+                logError('Service Worker setup failed', error);
+                console.error('Detailed SW setup error:', error);
+                return false;
+            }
+        }
+
+        // Register FCM token
+        async function registerFcmToken() {
+            if (!isConnected) {
+                logError('Must be connected before registering FCM token');
+                return;
+            }
+            
+            fcmToken = elements.fcmToken.value.trim();
+            
+            if (!fcmToken) {
+                logError('FCM token is required');
+                return;
+            }
+            
+            logInfo(`Registering FCM token for user ${userId}`, 'fcm');
+            
+            try {
+                const response = await fetch(`${serverUrl}/api/notifications/token`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        token: fcmToken
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    logSuccess('FCM token registered successfully');
+                    updateFcmStatus(true);
+                } else {
+                    logError(`Failed to register FCM token: ${data.message || 'Unknown error'}`);
+                    updateFcmStatus(false);
+                }
+            } catch (error) {
+                logError('Error registering FCM token', error);
+                updateFcmStatus(false);
+            }
+        }
+
+        // Send test FCM notification
+        async function sendTestFCMNotification() {
+            if (!isConnected) {
+                logError('Must be connected before sending notifications');
+                return;
+            }
+            
+            logInfo('Sending test FCM notification', 'fcm');
+            
+            try {
+                // Create a client-side unique ID for deduplication
+                const clientId = `fcm-test-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
+                
+                // Add this client ID to our tracking to prevent displaying duplicates
+                trackNotification(clientId);
+                
+                // Check if we already sent a notification in the last 2 seconds
+                const now = Date.now();
+                if (lastFcmSentTime && (now - lastFcmSentTime) < 2000) {
+                    logWarning('Throttling FCM notification - please wait at least 2 seconds between tests', 'fcm');
+                    return;
+                }
+                lastFcmSentTime = now;
+                
+                const response = await fetch(`${serverUrl}/api/notifications/test`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        title: elements.notificationTitle.value.trim() || 'Test FCM Notification',
+                        message: elements.notificationMessage.value.trim() || 'This is a test FCM notification from the notification tester.',
+                        type: elements.notificationType.value || 'test',
+                        data: {
+                            source: 'notification-tester',
+                            timestamp: Date.now().toString(),
+                            clientId: clientId  // Include in data for client-side deduplication
+                        },
+                        clientId: clientId  // Include at top level for server-side deduplication
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    logSuccess('Test FCM notification sent successfully', 'fcm');
+                    // Don't add to list - wait for FCM to deliver it
+                } else {
+                    logError(`Failed to send test FCM notification: ${data.message || 'Unknown error'}`, 'fcm');
+                }
+            } catch (error) {
+                logError('Error sending test FCM notification', error);
+            }
+        }
+
+        // Send test socket notification via API
+        async function sendTestSocketNotification() {
+            if (!isConnected) {
+                logError('Must be connected before sending notifications');
+                return;
+            }
+            
+            if (!socket || !socket.connected) {
+                logError('WebSocket not connected. Cannot send socket notification.');
+                return;
+            }
+            
+            const title = elements.notificationTitle.value.trim() || 'Test Notification';
+            const message = elements.notificationMessage.value.trim() || 'This is a test notification';
+            const type = elements.notificationType.value || 'test';
+            
+            if (!title || !message) {
+                logError('Title and message are required');
+                return;
+            }
+            
+            logInfo(`Sending test socket notification: ${title}`, 'websocket');
+            
+            try {
+                // Create a client-side unique ID for deduplication
+                const clientId = `socket-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
+                
+                // Add this client ID to our tracking to prevent displaying duplicates
+                trackNotification(clientId);
+                
+                // Using the server's test-socket endpoint - with exactly the format needed
+                const response = await fetch(`${serverUrl}/api/notifications/test-socket`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        notification: {
+                            title: title, 
+                            message: message,
+                            body: message, // Include both formats for compatibility
+                            type: type,
+                            timestamp: new Date().toISOString(),
+                            id: clientId
+                        },
+                        userId: elements.userId.value.trim(),
+                        clientId: clientId  // Add client ID for deduplication
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    logSuccess('Test socket notification sent successfully', 'websocket');
+                    
+                    // For immediate feedback, show a local copy in the UI
+                    // The real notification should come back through the WebSocket
+                    const notification = {
+                        title,
+                        message,
+                        body: message,
+                        type,
+                        timestamp: new Date().toISOString(),
+                        id: clientId,
+                        source: 'local-copy'
+                    };
+                    
+                    addNotification(notification, 'websocket-outgoing');
+                    logInfo('✓ Notification displayed in UI (local copy)', 'websocket');
+                } else {
+                    logError(`Failed to send test socket notification: ${data.message || 'Unknown error'}`, 'websocket');
+                }
+            } catch (error) {
+                logError('Error sending test socket notification', error);
+            }
+        }
+
+        // Send custom notification with advanced options
+        async function sendCustomNotification() {
+            if (!isConnected) {
+                logError('Must be connected before sending notifications');
+                return;
+            }
+            
+            const title = elements.customNotificationTitle.value.trim();
+            const message = elements.customNotificationMessage.value.trim();
+            const type = elements.customNotificationType.value;
+            
+            if (!title || !message) {
+                logError('Title and message are required');
+                return;
+            }
+            
+            let customDataPayload;
+            try {
+                customDataPayload = elements.customDataPayload.value ? 
+                    JSON.parse(elements.customDataPayload.value) : {};
+            } catch (error) {
+                logError('Invalid JSON in custom data payload', error);
+                return;
+            }
+            
+            logInfo(`Sending custom notification: ${title}`, 'info');
+            
+            try {
+                // Create a client-side unique ID for deduplication
+                const clientId = `custom-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
+                
+                // Add this client ID to our tracking to prevent displaying duplicates
+                trackNotification(clientId);
+                
+                // Prepare data payload - ensure we have string values for FCM requirements
+                const dataPayload = {
+                    ...customDataPayload,
+                    source: 'notification-tester-custom',
+                    clientId: clientId  // Include client ID in the data payload for deduplication
+                };
+                
+                const response = await fetch(`${serverUrl}/api/notifications/test`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        title,
+                        message,
+                        type,
+                        data: dataPayload,
+                        clientId: clientId  // Include at top level for server-side deduplication
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    logSuccess('Custom notification sent successfully');
+                    // Don't add to list - wait for FCM to deliver it
+                } else {
+                    logError(`Failed to send custom notification: ${data.message || 'Unknown error'}`);
+                }
+            } catch (error) {
+                logError('Error sending custom notification', error);
+            }
+        }
+
+        // Send predefined notification
+        async function sendPredefinedNotification() {
+            if (!isConnected) {
+                logError('Must be connected before sending notifications');
+                return;
+            }
+            
+            const selected = elements.predefinedNotification.value;
+            const notification = JSON.parse(JSON.stringify(predefinedNotifications[selected])); // Clone to avoid modifying original
+            
+            logInfo(`Sending predefined ${selected} notification`, 'info');
+            
+            try {
+                // Ensure all data values are strings (FCM requirement)
+                if (notification.data) {
+                    const stringifiedData = {};
+                    for (const key in notification.data) {
+                        if (notification.data.hasOwnProperty(key)) {
+                            // If value is an object or array, stringify it
+                            if (typeof notification.data[key] === 'object' && notification.data[key] !== null) {
+                                stringifiedData[key] = JSON.stringify(notification.data[key]);
+                            } else {
+                                // Otherwise convert to string
+                                stringifiedData[key] = String(notification.data[key]);
+                            }
+                        }
+                    }
+                    notification.data = stringifiedData;
+                }
+                
+                const response = await fetch(`${serverUrl}/api/notifications/test`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(notification)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    logSuccess(`Predefined ${selected} notification sent successfully`);
+                    
+                    // Don't add to notification list here - wait for FCM to deliver it
+                    // This prevents the duplicate notification issue
+                    // addNotification(notification, 'fcm');
+                } else {
+                    logError(`Failed to send predefined notification: ${data.message || 'Unknown error'}`);
+                    if (data.reason === 'no-tokens') {
+                        logWarning('No FCM tokens registered for this user. Register a token first.');
+                    }
+                }
+            } catch (error) {
+                logError('Error sending predefined notification', error);
+            }
+        }
+
+        // Check connection status via API
+        async function checkConnection() {
+            if (!isConnected) {
+                logError('Not connected to server');
+                return;
+            }
+            
+            logInfo('Checking connection status via API');
+            
+            try {
+                const response = await fetch(`${serverUrl}/api/notifications/connection-status`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${authToken || 'test-token'}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    logInfo(`API connection status: ${data.isConnected ? 'Connected' : 'Disconnected'}`);
+                    
+                    if (data.isConnected !== isConnected) {
+                        logWarning('WebSocket connection status mismatch between client and server');
+                    }
+                } else {
+                    logError(`Failed to check connection status: ${data.message || 'Unknown error'}`);
+                }
+            } catch (error) {
+                logError('Error checking connection status', error);
+            }
+        }
+
+        // Clear notification list
+        function clearNotifications() {
+            elements.notificationList.innerHTML = '';
+            logInfo('Notification list cleared');
+        }
+
+        // Clear debug logs
+        function clearLogs() {
+            elements.debugLog.innerHTML = '';
+            logInfo('Debug logs cleared');
+        }
+
+        // Download logs
+        function downloadLogs() {
+            const logContent = elements.debugLog.innerText;
+            const blob = new Blob([logContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `notification-logs-${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+            
+            URL.revokeObjectURL(url);
+            
+            logInfo('Logs downloaded');
+        }
+
+        // Setup Firebase Messaging
+        function setupFirebaseMessaging() {
+            if (!messaging) {
+                logError('Firebase Messaging not available');
+                return;
+            }
+
+            // Track processed notification IDs to prevent duplicates
+            const processedNotifications = new Set();
+
+            // Listen for messages while the app is in the foreground
+            messaging.onMessage((payload) => {
+                console.log('Received foreground FCM message:', payload);
+                logInfo(`Received foreground FCM message: ${payload.notification?.title || 'No title'}`, 'fcm');
+                
+                // Create a unique ID from the payload to identify duplicates
+                const notificationId = createNotificationId(payload);
+                
+                // Skip if we've already processed this notification
+                if (processedNotifications.has(notificationId)) {
+                    logInfo(`Skipping duplicate FCM notification (local): ${notificationId}`, 'fcm');
+                    return;
+                }
+                
+                // Skip if we've already shown a browser notification recently for this
+                if (hasRecentlyShown(notificationId)) {
+                    logInfo(`Skipping duplicate FCM notification (global): ${notificationId}`, 'fcm');
+                    return;
+                }
+                
+                // Add to processed set
+                processedNotifications.add(notificationId);
+                trackNotification(notificationId);
+                
+                // Immediately tell the service worker we're handling this notification
+                // This prevents the service worker from also displaying it
+                if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({
+                        type: 'NOTIFICATION_HANDLED',
+                        notificationId: notificationId
+                    });
+                    logInfo(`Told service worker we're handling notification: ${notificationId}`, 'fcm');
+                }
+                
+                // Set expiration for the ID to prevent memory leaks
+                setTimeout(() => {
+                    processedNotifications.delete(notificationId);
+                }, 60000); // Increased from 10s to 60s
+                
+                const notification = {
+                    title: payload.notification?.title || 'No Title',
+                    message: payload.notification?.body || payload.data?.message || payload.data?.body || 'No Message',
+                    type: payload.data?.type || 'unknown',
+                    timestamp: new Date().toISOString(),
+                    data: payload.data || {}
+                };
+                
+                addNotification(notification, 'fcm');
+                
+                // Show a browser notification as well
+                if (Notification.permission === 'granted') {
+                    const options = {
+                        body: notification.message,
+                        icon: '/favicon.ico',
+                        data: notification.data,
+                        tag: notificationId,  // Add the unique ID as a tag to prevent duplicates
+                        // Prevent duplicate notifications in the same page
+                        requireInteraction: false,
+                        renotify: false
+                    };
+                    
+                    logInfo(`Creating browser notification for FCM: ${notification.title}`, 'fcm');
+                    
+                    // First suppress any existing notifications with the same tag
+                    suppressDuplicateNotifications(notificationId).then(() => {
+                        // Small delay to prevent race conditions
+                        setTimeout(() => {
+                            try {
+                                new Notification(notification.title, options);
+                                logSuccess("Browser notification shown successfully!");
+                            } catch (e) {
+                                logError("Failed to show browser notification", e);
+                            }
+                        }, 50);
+                    });
+                }
+            });
+
+            // Log token refresh events to help with debugging
+            messaging.onTokenRefresh(() => {
+                logInfo("FCM token being refreshed...", 'fcm');
+                messaging.getToken({vapidKey: vapidKey}).then((refreshedToken) => {
+                    logSuccess("FCM token refreshed: " + refreshedToken.substring(0, 15) + "...");
+                    fcmToken = refreshedToken;
+                    elements.fcmToken.value = refreshedToken;
+                }).catch((err) => {
+                    logError("Unable to refresh FCM token", err);
+                });
+            });
+
+            // Handle background messages (via service worker)
+            if (navigator.serviceWorker) {
+                navigator.serviceWorker.addEventListener('message', (event) => {
+                    if (event.data && event.data.type === 'fcm-notification') {
+                        const payload = event.data.payload;
+                        logInfo(`Received FCM message via service worker: ${payload.notification?.title || 'No title'}`, 'fcm');
+                        
+                        // Create a unique ID from the payload
+                        const notificationId = createNotificationId(payload);
+                        
+                        // Skip if we've already processed this notification
+                        if (processedNotifications.has(notificationId)) {
+                            logInfo(`Skipping duplicate FCM notification from service worker (local): ${notificationId}`, 'fcm');
+                            return;
+                        }
+                        
+                        // Skip if shown globally recently
+                        if (hasRecentlyShown(notificationId)) {
+                            logInfo(`Skipping duplicate FCM notification from service worker (global): ${notificationId}`, 'fcm');
+                            return;
+                        }
+                        
+                        // Add to processed set
+                        processedNotifications.add(notificationId);
+                        trackNotification(notificationId);
+                        
+                        // Set expiration
+                        setTimeout(() => {
+                            processedNotifications.delete(notificationId);
+                        }, 60000); // Increased from 10s to 60s
+                        
+                        const notification = {
+                            title: payload.notification?.title || 'No Title',
+                            message: payload.notification?.body || 'No Message',
+                            type: payload.data?.type || 'unknown',
+                            timestamp: new Date().toISOString(),
+                            data: payload.data || {}
+                        };
+                        
+                        // Add to notification list in UI
+                        addNotification(notification, 'fcm');
+                        
+                        // If the page is visible, immediately tell the service worker we'll handle it
+                        if (document.visibilityState === 'visible' && navigator.serviceWorker.controller) {
+                            // Immediately send message to service worker that we'll handle this
+                            navigator.serviceWorker.controller.postMessage({
+                                type: 'NOTIFICATION_HANDLED',
+                                notificationId: notificationId
+                            });
+                            
+                            // IMPORTANT: Don't show a browser notification here if the page is visible
+                            // The foreground handler will take care of it
+                            logInfo(`Page is visible, letting foreground handler show notification: ${notification.title}`, 'fcm');
+                        } else {
+                            // Only show notification if page is not visible
+                            logInfo(`Page not visible, showing notification via service worker: ${notification.title}`, 'fcm');
+                            
+                            // Show notification using the page
+                            if (Notification.permission === 'granted') {
+                                const options = {
+                                    body: notification.message,
+                                    icon: '/favicon.ico',
+                                    data: notification.data,
+                                    tag: notificationId,
+                                    // Prevent duplicate notifications in the same page
+                                    requireInteraction: false,
+                                    renotify: false
+                                };
+                                
+                                // First suppress any existing notifications with the same tag
+                                suppressDuplicateNotifications(notificationId).then(() => {
+                                    // Use setTimeout to delay creation very slightly to prevent race conditions
+                                    setTimeout(() => {
+                                        new Notification(notification.title, options);
+                                    }, 50);
+                                });
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Listen for actual notification clicks
+            if (navigator.serviceWorker) {
+                navigator.serviceWorker.addEventListener('notificationclick', (event) => {
+                    logInfo(`Notification clicked: ${event.notification.title}`, 'notification');
+                    event.notification.close();
+                });
+            }
+
+            // Send message to service worker when the page is visible
+            // This helps coordinate notification display
+            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                // Tell the service worker we're active and can handle notifications
+                navigator.serviceWorker.controller.postMessage({
+                    type: 'PAGE_ACTIVE',
+                    clientId: Date.now().toString()
+                });
+                
+                // Handle visibility changes
+                document.addEventListener('visibilitychange', () => {
+                    navigator.serviceWorker.controller.postMessage({
+                        type: document.visibilityState === 'visible' ? 'PAGE_VISIBLE' : 'PAGE_HIDDEN',
+                        clientId: Date.now().toString()
+                    });
+                });
+                
+                logInfo('Notification coordination with service worker established', 'fcm');
+            }
+        }
+
+        // Helper function to create a unique ID from notification payload
+        function createNotificationId(payload) {
+            try {
+                // Create a string that combines title, body, and a subset of data fields
+                const title = payload.notification?.title || '';
+                const body = payload.notification?.body || '';
+                const dataString = payload.data ? 
+                    Object.entries(payload.data)
+                        .filter(([key]) => ['type', 'timestamp', 'userId'].includes(key))
+                        .map(([key, value]) => `${key}:${value}`)
+                        .join(',') 
+                    : '';
+                
+                return `${title}|${body}|${dataString}`;
+            } catch (e) {
+                // Fallback to timestamp if anything goes wrong
+                return `notification-${Date.now()}`;
+            }
+        }
+
+        // Helper function to track notifications globally for deduplication
+        function trackNotification(id) {
+            if (!id) return false;
+            
+            // If we've already seen this notification, don't show it again
+            if (sentNotifications.has(id)) {
+                logWarning(`Duplicate notification detected (ID: ${id})`);
+                return false;
+            }
+            
+            // Add to our tracking set
+            sentNotifications.add(id);
+            logInfo(`Tracking notification: ${id}`, 'debug');
+            
+            // Auto expire tracking after timeout to prevent memory leak
+            setTimeout(() => {
+                sentNotifications.delete(id);
+                logInfo(`Expired notification tracking for: ${id}`, 'debug');
+            }, NOTIFICATION_EXPIRY_MS);
+            
+            return true;
+        }
+
+        // Check if a notification was recently shown to avoid duplicates
+        function hasRecentlyShown(id) {
+            const timestamp = recentNotifications.get(id);
+            if (!timestamp) return false;
+            return (Date.now() - timestamp) < NOTIFICATION_DEDUP_WINDOW;
+        }
+
+        // Add notification display handler to avoid showing duplicate browser notifications
+        self.addEventListener('notificationdisplay', (event) => {
+            const notificationId = event.notification.tag;
+            if (notificationId) {
+                trackNotification(notificationId);
+            }
+        });
+
+        // Suppress existing notifications with the same tag when creating a new one
+        async function suppressDuplicateNotifications(tag) {
+            if (!('Notification' in window) || !navigator.serviceWorker) {
+                return Promise.resolve();
+            }
+            
+            try {
+                const serviceWorkerRegistration = await navigator.serviceWorker.ready;
+                if (serviceWorkerRegistration.getNotifications) {
+                    const notifications = await serviceWorkerRegistration.getNotifications({tag});
+                    notifications.forEach(notification => {
+                        notification.close();
+                        logInfo(`Closed existing notification with tag: ${tag}`, 'notification');
+                    });
+                }
+            } catch (error) {
+                console.error('Error suppressing duplicate notifications:', error);
+            }
+            return Promise.resolve();
+        }
+
+        // Event listeners
+        elements.connectButton.addEventListener('click', connectWebSocket);
+        elements.disconnectButton.addEventListener('click', disconnectWebSocket);
+        elements.checkConnectionButton.addEventListener('click', checkConnection);
+        
+        elements.generateTokenButton.addEventListener('click', () => {
+            const token = generateMockFcmToken();
+            elements.fcmToken.value = token;
+            logInfo('Generated mock FCM token', 'fcm');
+        });
+        
+        elements.getFirebaseTokenButton.addEventListener('click', getFirebaseToken);
+        elements.registerTokenButton.addEventListener('click', registerFcmToken);
+        
+        elements.sendTestNotificationButton.addEventListener('click', sendTestFCMNotification);
+        elements.sendTestSocketNotificationButton.addEventListener('click', sendTestSocketNotification);
+        elements.sendCustomNotificationButton.addEventListener('click', sendCustomNotification);
+        elements.sendPredefinedNotificationButton.addEventListener('click', sendPredefinedNotification);
+        
+        elements.clearNotificationsButton.addEventListener('click', clearNotifications);
+        elements.clearLogsButton.addEventListener('click', clearLogs);
+        elements.downloadLogsButton.addEventListener('click', downloadLogs);
+        elements.refreshStatsButton.addEventListener('click', updateStats);
+        
+        // Add event listener for the download service worker button
+        document.getElementById('download-sw-file').addEventListener('click', () => {
+            // Firebase configuration to include in the service worker
+            const swContent = `// Firebase Messaging Service Worker for handling background notifications
+console.log('[firebase-messaging-sw.js] Service Worker initialized');
+
+// Import and configure the Firebase SDK
+importScripts('https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js');
+
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "${firebaseConfig.apiKey}",
+  authDomain: "${firebaseConfig.authDomain}",
+  projectId: "${firebaseConfig.projectId}",
+  storageBucket: "${firebaseConfig.storageBucket}",
+  messagingSenderId: "${firebaseConfig.messagingSenderId}",
+  appId: "${firebaseConfig.appId}",
+  measurementId: "${firebaseConfig.measurementId}"
+};
+
+// Initialize Firebase and Messaging
+let messaging;
+try {
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  console.log('[firebase-messaging-sw.js] Firebase initialized');
+
+  // Initialize Firebase Messaging
+  messaging = firebase.messaging();
+  console.log('[firebase-messaging-sw.js] Firebase Messaging initialized');
+} catch (error) {
+  console.error('[firebase-messaging-sw.js] Firebase initialization error:', error);
+}
+
+
+
+// Service worker lifecycle events
+self.addEventListener('install', (event) => {
+  console.log('[firebase-messaging-sw.js] Service Worker installed');
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+  console.log('[firebase-messaging-sw.js] Service Worker activated');
+  return self.clients.claim();
+});
+
+// For debugging - handle push events directly
+self.addEventListener('push', (event) => {
+  console.log('[firebase-messaging-sw.js] Push event received', event);
+  
+  if (!event.data) {
+    console.log('[firebase-messaging-sw.js] Push event has no data');
+    return;
+  }
+  
+  try {
+    const data = event.data.json();
+    console.log('[firebase-messaging-sw.js] Push event data:', data);
+    
+    if (!messaging) {
+      // If Firebase Messaging isn't working, handle notification manually
+      event.waitUntil(
+        self.registration.showNotification(
+          data.notification?.title || 'New Notification',
+          {
+            body: data.notification?.body || 'You have a new notification',
+            icon: '/favicon.ico',
+            data: data.data || {}
+          }
+        )
+      );
+    }
+  } catch (error) {
+    console.error('[firebase-messaging-sw.js] Error handling push event:', error);
+  }
+});`;
+
+            // Create a blob with the service worker content
+            const blob = new Blob([swContent], { type: 'application/javascript' });
+            const url = URL.createObjectURL(blob);
+            
+            // Create a download link and trigger the download
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'firebase-messaging-sw.js';
+            a.click();
+            
+            // Clean up
+            URL.revokeObjectURL(url);
+            
+            logInfo('Service worker file downloaded', 'fcm');
+            logWarning('Place this file at the root of your web server for FCM to work');
+        });
+        
+        // Initialize predefined notification details
+        elements.predefinedNotificationDetails.textContent = JSON.stringify(
+            predefinedNotifications[elements.predefinedNotification.value], null, 2
+        );
+        
+        // Setup Firebase messaging
+        setupFirebaseMessaging();
+        
+        // Startup logs
+        logInfo('Notification Tester initialized');
+        logInfo('Connect to a server to begin testing');
+    </script>
+
+    <!-- Firebase service worker registration script -->
+    <script>
+        // Check if service workers are supported
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', async () => {
+                try {
+                    // Note: Firebase requires the service worker to be at the root path
+                    // This registration is attempted, but may fail if the file is not there
+                    const swPath = '/firebase-messaging-sw.js';
+                    
+                    try {
+                        // Check if service worker already exists
+                        const existingReg = await navigator.serviceWorker.getRegistration(swPath);
+                        if (existingReg) {
+                            logInfo(`Found existing Service Worker at ${existingReg.scope}`, 'fcm');
+                        } else {
+                            logInfo(`Attempting to register Service Worker from: ${swPath}`, 'fcm');
+                            
+                            try {
+                                const reg = await navigator.serviceWorker.register(swPath);
+                                logInfo(`Service Worker registered with scope: ${reg.scope}`, 'fcm');
+                            } catch (err) {
+                                logError(`Failed to register service worker: ${err.message}`, err);
+                                logWarning(`You need to manually copy firebase-messaging-sw.js to ${window.location.origin}/`);
+                            }
+                        }
+                    } catch (err) {
+                        logError('Error checking service worker registration:', err);
+                    }
+                    
+                    // No need to call useServiceWorker - Firebase looks for it automatically
+                    
+                } catch (error) {
+                    logError('Service Worker setup failed', error);
+                    console.error('Detailed service worker error:', error);
+                }
+            });
+        } else {
+            logError('Service Workers are not supported in this browser');
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Connection Diagnostics</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .panel {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            background-color: #f9f9f9;
+        }
+        .log-panel {
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            background-color: #222;
+            color: #fff;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success { color: #4CAF50; }
+        .error { color: #F44336; }
+        .warning { color: #FF9800; }
+        .info { color: #2196F3; }
+        button {
+            padding: 8px 16px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        button:hover {
+            background-color: #0b7dda;
+        }
+        input, select {
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .connection-status {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        .connected { background-color: #4CAF50; }
+        .disconnected { background-color: #F44336; }
+        .connecting { background-color: #FF9800; }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="panel">
+            <h1>WebSocket Connection Diagnostics</h1>
+            <p>Use this tool to diagnose WebSocket connection issues and test notification delivery.</p>
+            
+            <div class="form-group">
+                <label for="serverUrl">Server URL:</label>
+                <input type="text" id="serverUrl" value="http://localhost:4000" placeholder="http://localhost:4000">
+            </div>
+            
+            <div class="form-group">
+                <label for="userId">User ID:</label>
+                <input type="text" id="userId" placeholder="Enter your user ID">
+            </div>
+            
+            <div>
+                <span class="connection-status disconnected" id="statusIndicator"></span>
+                <span id="connectionStatus">Disconnected</span>
+                <button id="connectBtn">Connect</button>
+                <button id="disconnectBtn" disabled>Disconnect</button>
+            </div>
+        </div>
+        
+        <div class="panel" id="connectionPanel" style="display: none;">
+            <h2>Connection Details</h2>
+            <div id="connectionDetails">
+                <table>
+                    <tr>
+                        <th>Property</th>
+                        <th>Value</th>
+                    </tr>
+                    <tr>
+                        <td>Socket ID</td>
+                        <td id="socketId">-</td>
+                    </tr>
+                    <tr>
+                        <td>Connected</td>
+                        <td id="isConnected">-</td>
+                    </tr>
+                    <tr>
+                        <td>Transport</td>
+                        <td id="transport">-</td>
+                    </tr>
+                    <tr>
+                        <td>In Room</td>
+                        <td id="inRoom">-</td>
+                    </tr>
+                    <tr>
+                        <td>Last Activity</td>
+                        <td id="lastActivity">-</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <h3>Connection Tests</h3>
+            <button id="pingBtn">Ping Test</button>
+            <button id="heartbeatBtn">Heartbeat Test</button>
+            <button id="checkConnectionBtn">Check Connection</button>
+            <button id="refreshDetailsBtn">Refresh Details</button>
+            
+            <h3>Notification Test</h3>
+            <div class="form-group">
+                <label for="notificationTitle">Title:</label>
+                <input type="text" id="notificationTitle" value="Test Notification">
+            </div>
+            <div class="form-group">
+                <label for="notificationMessage">Message:</label>
+                <input type="text" id="notificationMessage" value="This is a test notification">
+            </div>
+            <div class="form-group">
+                <label for="notificationType">Type:</label>
+                <select id="notificationType">
+                    <option value="test">Test</option>
+                    <option value="activity">Activity</option>
+                    <option value="medication">Medication</option>
+                    <option value="meal">Meal</option>
+                    <option value="watch">Watch</option>
+                </select>
+            </div>
+            <button id="sendTestBtn">Send Test Notification</button>
+        </div>
+        
+        <div class="panel">
+            <h2>Event Log</h2>
+            <button id="clearLogBtn">Clear Log</button>
+            <div class="log-panel" id="logPanel"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+    <script>
+        // DOM Elements
+        const elements = {
+            serverUrl: document.getElementById('serverUrl'),
+            userId: document.getElementById('userId'),
+            connectBtn: document.getElementById('connectBtn'),
+            disconnectBtn: document.getElementById('disconnectBtn'),
+            statusIndicator: document.getElementById('statusIndicator'),
+            connectionStatus: document.getElementById('connectionStatus'),
+            connectionPanel: document.getElementById('connectionPanel'),
+            socketId: document.getElementById('socketId'),
+            isConnected: document.getElementById('isConnected'),
+            transport: document.getElementById('transport'),
+            inRoom: document.getElementById('inRoom'),
+            lastActivity: document.getElementById('lastActivity'),
+            pingBtn: document.getElementById('pingBtn'),
+            heartbeatBtn: document.getElementById('heartbeatBtn'),
+            checkConnectionBtn: document.getElementById('checkConnectionBtn'),
+            refreshDetailsBtn: document.getElementById('refreshDetailsBtn'),
+            notificationTitle: document.getElementById('notificationTitle'),
+            notificationMessage: document.getElementById('notificationMessage'),
+            notificationType: document.getElementById('notificationType'),
+            sendTestBtn: document.getElementById('sendTestBtn'),
+            logPanel: document.getElementById('logPanel'),
+            clearLogBtn: document.getElementById('clearLogBtn')
+        };
+
+        // Socket.IO instance
+        let socket = null;
+        let connected = false;
+        let lastHeartbeat = null;
+
+        // Connection state
+        let connectionData = {
+            socketId: null,
+            connected: false,
+            transport: null,
+            inRoom: false,
+            lastActivity: null
+        };
+
+        // Initialize
+        function init() {
+            loadSavedValues();
+            attachEventHandlers();
+            startHeartbeatTracking();
+        }
+
+        // Load saved values from localStorage
+        function loadSavedValues() {
+            if (localStorage.getItem('serverUrl')) {
+                elements.serverUrl.value = localStorage.getItem('serverUrl');
+            }
+            if (localStorage.getItem('userId')) {
+                elements.userId.value = localStorage.getItem('userId');
+            }
+        }
+
+        // Attach event handlers
+        function attachEventHandlers() {
+            elements.connectBtn.addEventListener('click', connectSocket);
+            elements.disconnectBtn.addEventListener('click', disconnectSocket);
+            elements.pingBtn.addEventListener('click', sendPing);
+            elements.heartbeatBtn.addEventListener('click', sendHeartbeat);
+            elements.checkConnectionBtn.addEventListener('click', checkConnection);
+            elements.refreshDetailsBtn.addEventListener('click', refreshConnectionDetails);
+            elements.sendTestBtn.addEventListener('click', sendTestNotification);
+            elements.clearLogBtn.addEventListener('click', clearLog);
+        }
+
+        // Connect to WebSocket
+        function connectSocket() {
+            const serverUrl = elements.serverUrl.value.trim();
+            const userId = elements.userId.value.trim();
+            
+            if (!serverUrl || !userId) {
+                logError('Server URL and User ID are required');
+                return;
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('serverUrl', serverUrl);
+            localStorage.setItem('userId', userId);
+            
+            try {
+                logInfo(`Connecting to ${serverUrl} with user ID ${userId}...`);
+                
+                // Update UI
+                elements.statusIndicator.className = 'connection-status connecting';
+                elements.connectionStatus.textContent = 'Connecting...';
+                elements.connectBtn.disabled = true;
+                
+                // Connect to Socket.IO
+                socket = io(serverUrl, {
+                    auth: { userId },
+                    reconnection: true,
+                    reconnectionAttempts: 5,
+                    reconnectionDelay: 1000,
+                    timeout: 10000
+                });
+                
+                // Connection events
+                socket.on('connect', () => {
+                    connected = true;
+                    logSuccess('Connected to WebSocket server');
+                    
+                    // Update UI
+                    elements.statusIndicator.className = 'connection-status connected';
+                    elements.connectionStatus.textContent = 'Connected';
+                    elements.connectBtn.disabled = true;
+                    elements.disconnectBtn.disabled = false;
+                    elements.connectionPanel.style.display = 'block';
+                    
+                    // Update connection details
+                    connectionData.socketId = socket.id;
+                    connectionData.connected = true;
+                    connectionData.transport = socket.io.engine.transport.name;
+                    connectionData.lastActivity = new Date().toISOString();
+                    
+                    updateConnectionDetails();
+                    
+                    // Register for automatic connection check
+                    setTimeout(refreshConnectionDetails, 2000);
+                });
+                
+                socket.on('disconnect', (reason) => {
+                    connected = false;
+                    logWarning(`Disconnected: ${reason}`);
+                    
+                    // Update UI
+                    elements.statusIndicator.className = 'connection-status disconnected';
+                    elements.connectionStatus.textContent = `Disconnected: ${reason}`;
+                    elements.connectBtn.disabled = false;
+                    elements.disconnectBtn.disabled = true;
+                    
+                    // Update connection details
+                    connectionData.connected = false;
+                    connectionData.lastActivity = new Date().toISOString();
+                    updateConnectionDetails();
+                });
+                
+                socket.on('connect_error', (error) => {
+                    logError(`Connection error: ${error.message}`);
+                    
+                    // Update UI
+                    elements.statusIndicator.className = 'connection-status disconnected';
+                    elements.connectionStatus.textContent = `Connection failed: ${error.message}`;
+                    elements.connectBtn.disabled = false;
+                });
+                
+                socket.on('error', (error) => {
+                    logError(`Socket error: ${error}`);
+                });
+                
+                // Custom events
+                socket.on('pong', (data) => {
+                    const latency = Date.now() - data.timestamp;
+                    logInfo(`Received pong (latency: ${latency}ms)`);
+                    connectionData.lastActivity = new Date().toISOString();
+                    updateConnectionDetails();
+                });
+                
+                socket.on('heartbeat-ack', (data) => {
+                    const latency = Date.now() - data.timestamp;
+                    lastHeartbeat = new Date();
+                    logInfo(`Received heartbeat acknowledgement (latency: ${latency}ms)`);
+                    connectionData.lastActivity = new Date().toISOString();
+                    updateConnectionDetails();
+                });
+                
+                socket.on('socket-connected', (data) => {
+                    logInfo(`Received connection confirmation: ${JSON.stringify(data)}`);
+                });
+                
+                socket.on('connection-status', (data) => {
+                    logInfo(`Received connection status: ${JSON.stringify(data)}`);
+                    // Update UI with fresh data
+                    connectionData.inRoom = data.inRoom;
+                    updateConnectionDetails();
+                });
+                
+                socket.on('notification', (notification) => {
+                    logSuccess(`Received notification: ${notification.title} - ${notification.message}`);
+                    // Show browser notification if possible
+                    if ('Notification' in window && Notification.permission === 'granted') {
+                        new Notification(notification.title, {
+                            body: notification.message,
+                            icon: '/favicon.ico'
+                        });
+                    }
+                });
+                
+            } catch (error) {
+                logError(`Error setting up connection: ${error.message}`);
+                elements.connectBtn.disabled = false;
+            }
+        }
+
+        // Disconnect WebSocket
+        function disconnectSocket() {
+            if (socket) {
+                logInfo('Disconnecting from WebSocket server...');
+                socket.disconnect();
+                socket = null;
+                connected = false;
+                
+                // Update UI
+                elements.statusIndicator.className = 'connection-status disconnected';
+                elements.connectionStatus.textContent = 'Disconnected';
+                elements.connectBtn.disabled = false;
+                elements.disconnectBtn.disabled = true;
+            }
+        }
+
+        // Send ping test
+        function sendPing() {
+            if (!socket || !connected) {
+                logError('Not connected to WebSocket');
+                return;
+            }
+            
+            const pingTime = Date.now();
+            logInfo(`Sending ping test...`);
+            socket.emit('ping');
+            connectionData.lastActivity = new Date().toISOString();
+            updateConnectionDetails();
+        }
+
+        // Send heartbeat
+        function sendHeartbeat() {
+            if (!socket || !connected) {
+                logError('Not connected to WebSocket');
+                return;
+            }
+            
+            logInfo(`Sending heartbeat...`);
+            socket.emit('heartbeat');
+            connectionData.lastActivity = new Date().toISOString();
+            updateConnectionDetails();
+        }
+
+        // Check connection
+        function checkConnection() {
+            if (!socket || !connected) {
+                logError('Not connected to WebSocket');
+                return;
+            }
+            
+            logInfo(`Checking connection status...`);
+            socket.emit('check-connection', {}, (response) => {
+                if (response.error) {
+                    logError(`Connection check error: ${response.error}`);
+                } else {
+                    logSuccess(`Connection check response: ${JSON.stringify(response)}`);
+                    // Update UI with fresh data
+                    connectionData.inRoom = response.inRoom;
+                    updateConnectionDetails();
+                }
+            });
+            connectionData.lastActivity = new Date().toISOString();
+            updateConnectionDetails();
+        }
+
+        // Refresh connection details
+        function refreshConnectionDetails() {
+            if (!socket || !connected) {
+                return;
+            }
+            
+            // Update transport info if available
+            if (socket.io && socket.io.engine) {
+                connectionData.transport = socket.io.engine.transport.name;
+            }
+            
+            // Check room status
+            checkConnection();
+            
+            updateConnectionDetails();
+        }
+
+        // Send test notification
+        async function sendTestNotification() {
+            if (!socket || !connected) {
+                logError('Not connected to WebSocket');
+                return;
+            }
+            
+            const title = elements.notificationTitle.value.trim();
+            const message = elements.notificationMessage.value.trim();
+            const type = elements.notificationType.value;
+            
+            if (!title || !message) {
+                logError('Title and message are required');
+                return;
+            }
+            
+            logInfo(`Requesting test notification: ${title}`);
+            
+            try {
+                const serverUrl = elements.serverUrl.value.trim();
+                const response = await fetch(`${serverUrl}/api/notifications/test-socket`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title,
+                        message,
+                        type,
+                        data: {
+                            source: 'connection-diagnostics',
+                            timestamp: Date.now()
+                        }
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    logSuccess(`Notification request sent successfully: ${data.message}`);
+                } else {
+                    logError(`Failed to send notification request: ${data.message}`);
+                    
+                    if (data.reason === 'user-not-connected') {
+                        logWarning('Server reports that user is not connected via WebSocket');
+                    }
+                }
+            } catch (error) {
+                logError(`Error sending notification request: ${error.message}`);
+            }
+        }
+
+        // Update connection details in UI
+        function updateConnectionDetails() {
+            elements.socketId.textContent = connectionData.socketId || '-';
+            elements.isConnected.textContent = connectionData.connected ? 'Yes' : 'No';
+            elements.transport.textContent = connectionData.transport || '-';
+            elements.inRoom.textContent = connectionData.inRoom ? 'Yes' : 'No';
+            elements.lastActivity.textContent = connectionData.lastActivity || '-';
+        }
+
+        // Start heartbeat tracking
+        function startHeartbeatTracking() {
+            // Send a heartbeat every 30 seconds to keep connection alive
+            setInterval(() => {
+                if (socket && connected) {
+                    socket.emit('heartbeat');
+                }
+            }, 30000);
+        }
+
+        // Logging functions
+        function logInfo(message) {
+            const logItem = document.createElement('div');
+            logItem.className = 'info';
+            logItem.textContent = `[${new Date().toLocaleTimeString()}] INFO: ${message}`;
+            elements.logPanel.appendChild(logItem);
+            elements.logPanel.scrollTop = elements.logPanel.scrollHeight;
+            console.log(`[INFO] ${message}`);
+        }
+
+        function logSuccess(message) {
+            const logItem = document.createElement('div');
+            logItem.className = 'success';
+            logItem.textContent = `[${new Date().toLocaleTimeString()}] SUCCESS: ${message}`;
+            elements.logPanel.appendChild(logItem);
+            elements.logPanel.scrollTop = elements.logPanel.scrollHeight;
+            console.log(`[SUCCESS] ${message}`);
+        }
+
+        function logWarning(message) {
+            const logItem = document.createElement('div');
+            logItem.className = 'warning';
+            logItem.textContent = `[${new Date().toLocaleTimeString()}] WARNING: ${message}`;
+            elements.logPanel.appendChild(logItem);
+            elements.logPanel.scrollTop = elements.logPanel.scrollHeight;
+            console.warn(`[WARNING] ${message}`);
+        }
+
+        function logError(message) {
+            const logItem = document.createElement('div');
+            logItem.className = 'error';
+            logItem.textContent = `[${new Date().toLocaleTimeString()}] ERROR: ${message}`;
+            elements.logPanel.appendChild(logItem);
+            elements.logPanel.scrollTop = elements.logPanel.scrollHeight;
+            console.error(`[ERROR] ${message}`);
+        }
+
+        function clearLog() {
+            elements.logPanel.innerHTML = '';
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html> 

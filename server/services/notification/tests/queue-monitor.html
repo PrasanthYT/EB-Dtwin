@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Di-Twin Queue Monitor</title>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --dark-color: #2d3748;
+            --light-color: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            margin: 0;
+            font-size: 18px;
+            color: var(--dark-color);
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-healthy {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        input[type="text"], 
+        input[type="number"],
+        select, 
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #3551d1;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .queue-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .queue-item {
+            padding: 10px;
+            border-left: 3px solid var(--primary-color);
+            background-color: #f8f9fa;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .queue-item.warning {
+            border-left-color: var(--warning-color);
+        }
+
+        .queue-item.error {
+            border-left-color: var(--danger-color);
+        }
+
+        .queue-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .queue-name {
+            font-weight: bold;
+            color: var(--dark-color);
+        }
+
+        .queue-time {
+            font-size: 12px;
+            color: #777;
+        }
+
+        .queue-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .metric-box {
+            text-align: center;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .metric-value.warning {
+            color: var(--warning-color);
+        }
+
+        .metric-value.error {
+            color: var(--danger-color);
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #777;
+        }
+
+        .issue-list {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #fff3cd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .issue-item {
+            margin-bottom: 5px;
+        }
+
+        .log-area {
+            height: 200px;
+            overflow-y: auto;
+            background-color: #1e1e1e;
+            color: #ddd;
+            font-family: monospace;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+
+        .log-info {
+            color: #6bb9f0;
+        }
+
+        .log-error {
+            color: #ff7979;
+        }
+
+        .log-success {
+            color: #2ecc71;
+        }
+
+        .log-warning {
+            color: #f39c12;
+        }
+
+        .statistics-card {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 15px 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 5px 0;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #777;
+        }
+
+        .chart-container {
+            height: 300px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Di-Twin Queue Monitor</h1>
+            <p>Monitor and analyze queue performance in real-time</p>
+        </header>
+
+        <div class="dashboard">
+            <!-- Connection Panel -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Connection</h2>
+                    <span id="connection-status" class="status status-error">Disconnected</span>
+                </div>
+                <div class="form-group">
+                    <label for="server-url">Server URL</label>
+                    <input type="text" id="server-url" value="http://localhost:4000" />
+                </div>
+                <div class="form-group">
+                    <label for="refresh-interval">Auto-refresh Interval (seconds)</label>
+                    <input type="number" id="refresh-interval" value="30" min="5" max="300" />
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="show-completed" checked>
+                        Include completed jobs in counts
+                    </label>
+                    <small style="display: block; color: #666; margin-top: 5px;">
+                        Uncheck to hide completed jobs in the total job count
+                    </small>
+                </div>
+                <div class="button-group">
+                    <button id="connect-button">Connect</button>
+                    <button id="disconnect-button" disabled>Disconnect</button>
+                    <button id="refresh-button" disabled>Refresh Now</button>
+                </div>
+            </div>
+
+            <!-- System Health -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">System Health</h2>
+                    <span id="system-health-status" class="status status-error">Unknown</span>
+                </div>
+                <div id="system-issues" class="issue-list" style="display: none;">
+                    <strong>Issues detected:</strong>
+                    <ul id="system-issues-list">
+                    </ul>
+                </div>
+                <div class="statistics-card">
+                    <div class="stat-box">
+                        <div class="stat-value" id="total-queues">0</div>
+                        <div class="stat-label">Queues</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="total-jobs">0</div>
+                        <div class="stat-label">Total Jobs</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="waiting-jobs">0</div>
+                        <div class="stat-label">Waiting</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="failed-jobs">0</div>
+                        <div class="stat-label">Failed</div>
+                    </div>
+                </div>
+                <div id="last-updated" class="queue-time" style="text-align: right; margin-top: 10px;">
+                    Last updated: Never
+                </div>
+            </div>
+
+            <!-- Queues List -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Queues</h2>
+                    <button id="clear-queues">Clear</button>
+                </div>
+                <div class="queue-list" id="queue-list">
+                    <div class="queue-item">
+                        <div class="queue-header">
+                            <span class="queue-name">Welcome</span>
+                            <span class="queue-time">Just now</span>
+                        </div>
+                        <div>
+                            Connect to a server to see queue metrics here.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History/Trend Chart -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Queue History</h2>
+                    <div class="button-group">
+                        <select id="chart-queue-select">
+                            <option value="all">All Queues</option>
+                        </select>
+                        <select id="chart-metric-select">
+                            <option value="waiting">Waiting Jobs</option>
+                            <option value="active">Active Jobs</option>
+                            <option value="completed">Completed Jobs</option>
+                            <option value="failed">Failed Jobs</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-container" id="history-chart">
+                    <p style="text-align: center; padding-top: 120px; color: #777;">
+                        Chart data will appear here after monitoring starts
+                    </p>
+                </div>
+            </div>
+
+            <!-- Debug Log -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Monitor Log</h2>
+                    <div class="button-group">
+                        <button id="clear-logs">Clear</button>
+                        <button id="download-logs">Download</button>
+                    </div>
+                </div>
+                <div class="log-area" id="debug-log"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- App script -->
+    <script>
+        // Global variables
+        let serverUrl = '';
+        let isConnected = false;
+        let refreshIntervalId = null;
+        let chart = null;
+        
+        // Queue history data storage
+        const queueHistory = {
+            timestamps: [],
+            queues: {}
+        };
+
+        // DOM Elements
+        const elements = {
+            // Connection panel
+            serverUrl: document.getElementById('server-url'),
+            refreshInterval: document.getElementById('refresh-interval'),
+            showCompleted: document.getElementById('show-completed'),
+            connectionStatus: document.getElementById('connection-status'),
+            connectButton: document.getElementById('connect-button'),
+            disconnectButton: document.getElementById('disconnect-button'),
+            refreshButton: document.getElementById('refresh-button'),
+            
+            // System health
+            systemHealthStatus: document.getElementById('system-health-status'),
+            systemIssues: document.getElementById('system-issues'),
+            systemIssuesList: document.getElementById('system-issues-list'),
+            totalQueues: document.getElementById('total-queues'),
+            totalJobs: document.getElementById('total-jobs'),
+            waitingJobs: document.getElementById('waiting-jobs'),
+            failedJobs: document.getElementById('failed-jobs'),
+            lastUpdated: document.getElementById('last-updated'),
+            
+            // Queue list
+            queueList: document.getElementById('queue-list'),
+            clearQueuesButton: document.getElementById('clear-queues'),
+            
+            // Chart
+            chartQueueSelect: document.getElementById('chart-queue-select'),
+            chartMetricSelect: document.getElementById('chart-metric-select'),
+            historyChart: document.getElementById('history-chart'),
+            
+            // Debug log
+            debugLog: document.getElementById('debug-log'),
+            clearLogsButton: document.getElementById('clear-logs'),
+            downloadLogsButton: document.getElementById('download-logs')
+        };
+
+        // Helper functions
+        function updateConnectionStatus(connected) {
+            isConnected = connected;
+            elements.connectionStatus.textContent = connected ? 'Connected' : 'Disconnected';
+            elements.connectionStatus.className = connected ? 'status status-healthy' : 'status status-error';
+            elements.connectButton.disabled = connected;
+            elements.disconnectButton.disabled = !connected;
+            elements.refreshButton.disabled = !connected;
+            
+            if (connected) {
+                logInfo('Connected to server');
+                fetchQueueMetrics();
+                startAutoRefresh();
+            } else {
+                logInfo('Disconnected from server');
+                stopAutoRefresh();
+            }
+        }
+
+        function updateSystemHealth(systemHealth) {
+            if (!systemHealth) {
+                elements.systemHealthStatus.textContent = 'Unknown';
+                elements.systemHealthStatus.className = 'status status-error';
+                elements.systemIssues.style.display = 'none';
+                return;
+            }
+            
+            elements.systemHealthStatus.textContent = systemHealth.status || 'Unknown';
+            elements.systemHealthStatus.className = `status status-${systemHealth.status || 'error'}`;
+            
+            if (systemHealth.issues && systemHealth.issues.length > 0) {
+                elements.systemIssuesList.innerHTML = '';
+                systemHealth.issues.forEach(issue => {
+                    const li = document.createElement('li');
+                    li.className = 'issue-item';
+                    li.textContent = issue;
+                    elements.systemIssuesList.appendChild(li);
+                });
+                elements.systemIssues.style.display = 'block';
+            } else {
+                elements.systemIssues.style.display = 'none';
+            }
+        }
+
+        function updateQueueList(queues) {
+            if (!queues) {
+                return;
+            }
+            
+            elements.queueList.innerHTML = '';
+            
+            const queueNames = Object.keys(queues);
+            let totalJobs = 0;
+            let totalWaiting = 0;
+            let totalFailed = 0;
+            
+            // Only display active/real queues (ones with metrics)
+            const activeQueues = queueNames.filter(name => 
+                queues[name] && !queues[name].error && queues[name].counts
+            );
+            
+            activeQueues.forEach(name => {
+                const queue = queues[name];
+                
+                if (queue.error) {
+                    // Handle error case
+                    const queueItem = document.createElement('div');
+                    queueItem.className = 'queue-item error';
+                    
+                    queueItem.innerHTML = `
+                        <div class="queue-header">
+                            <span class="queue-name">${name}</span>
+                            <span class="queue-time">${new Date().toLocaleTimeString()}</span>
+                        </div>
+                        <div>
+                            Error: ${queue.message || 'Unknown error fetching queue metrics'}
+                        </div>
+                    `;
+                    
+                    elements.queueList.appendChild(queueItem);
+                    return;
+                }
+                
+                // Track metrics for overall stats
+                if (queue.counts) {
+                    totalJobs += queue.counts.total || 0;
+                    totalWaiting += queue.counts.waiting || 0;
+                    totalFailed += queue.counts.failed || 0;
+                }
+                
+                // Create queue item
+                const queueItem = document.createElement('div');
+                queueItem.className = `queue-item ${queue.health?.status || ''}`;
+                
+                queueItem.innerHTML = `
+                    <div class="queue-header">
+                        <span class="queue-name">${name}</span>
+                        <span class="queue-time">${new Date().toLocaleTimeString()}</span>
+                    </div>
+                `;
+                
+                // Add metrics if available
+                if (queue.counts) {
+                    const metricsDiv = document.createElement('div');
+                    metricsDiv.className = 'queue-metrics';
+                    
+                    const metrics = [
+                        { label: 'Waiting', value: queue.counts.waiting || 0, key: 'waiting' },
+                        { label: 'Active', value: queue.counts.active || 0, key: 'active' },
+                        { label: 'Completed', value: queue.counts.completed || 0, key: 'completed' },
+                        { label: 'Failed', value: queue.counts.failed || 0, key: 'failed' },
+                        { label: 'Delayed', value: queue.counts.delayed || 0, key: 'delayed' }
+                    ];
+                    
+                    metrics.forEach(metric => {
+                        let statusClass = '';
+                        
+                        // Add warning/error classes based on thresholds
+                        if (metric.key === 'waiting' && metric.value > 100) {
+                            statusClass = metric.value > 500 ? 'error' : 'warning';
+                        } else if (metric.key === 'failed' && metric.value > 5) {
+                            statusClass = metric.value > 20 ? 'error' : 'warning';
+                        }
+                        
+                        metricsDiv.innerHTML += `
+                            <div class="metric-box">
+                                <div class="metric-value ${statusClass}">${metric.value}</div>
+                                <div class="metric-label">${metric.label}</div>
+                            </div>
+                        `;
+                    });
+                    
+                    queueItem.appendChild(metricsDiv);
+                }
+                
+                // Add health issues if available
+                if (queue.health && queue.health.issues && queue.health.issues.length > 0) {
+                    const issuesDiv = document.createElement('div');
+                    issuesDiv.className = 'issue-list';
+                    
+                    issuesDiv.innerHTML = '<strong>Issues:</strong><ul>';
+                    queue.health.issues.forEach(issue => {
+                        issuesDiv.innerHTML += `<li class="issue-item">${issue}</li>`;
+                    });
+                    issuesDiv.innerHTML += '</ul>';
+                    
+                    queueItem.appendChild(issuesDiv);
+                }
+                
+                elements.queueList.appendChild(queueItem);
+            });
+            
+            // Update system stats - show the number of active queues, not all Redis keys
+            elements.totalQueues.textContent = activeQueues.length;
+            elements.totalJobs.textContent = totalJobs;
+            elements.waitingJobs.textContent = totalWaiting;
+            elements.failedJobs.textContent = totalFailed;
+            
+            // If no active queues but some queues were found in the data
+            if (activeQueues.length === 0 && queueNames.length > 0) {
+                const infoItem = document.createElement('div');
+                infoItem.className = 'queue-item';
+                infoItem.innerHTML = `
+                    <div class="queue-header">
+                        <span class="queue-name">Queue Information</span>
+                        <span class="queue-time">${new Date().toLocaleTimeString()}</span>
+                    </div>
+                    <div>
+                        Found ${queueNames.length} queue(s) but none have active metrics.
+                        <br>This might indicate Redis has queue metadata keys but no active job queues.
+                    </div>
+                `;
+                elements.queueList.appendChild(infoItem);
+            }
+            
+            // Update chart queue select options - only use active queues
+            updateChartQueueOptions(activeQueues);
+            
+            // Update last updated time
+            elements.lastUpdated.textContent = `Last updated: ${new Date().toLocaleString()}`;
+        }
+
+        function updateChartQueueOptions(queueNames) {
+            // Save current selection
+            const currentValue = elements.chartQueueSelect.value;
+            
+            // Clear existing options except "All Queues"
+            while (elements.chartQueueSelect.options.length > 1) {
+                elements.chartQueueSelect.remove(1);
+            }
+            
+            // Add queue options
+            queueNames.forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                elements.chartQueueSelect.appendChild(option);
+            });
+            
+            // Restore selection if it still exists
+            if (Array.from(elements.chartQueueSelect.options).some(opt => opt.value === currentValue)) {
+                elements.chartQueueSelect.value = currentValue;
+            }
+        }
+
+        function storeQueueHistoryData(metrics) {
+            if (!metrics || !metrics.queues) return;
+            
+            // Add timestamp
+            const timestamp = new Date();
+            queueHistory.timestamps.push(timestamp);
+            
+            // Limit history to last 50 points
+            if (queueHistory.timestamps.length > 50) {
+                queueHistory.timestamps.shift();
+            }
+            
+            // Update each queue's history
+            Object.keys(metrics.queues).forEach(queueName => {
+                if (!queueHistory.queues[queueName]) {
+                    queueHistory.queues[queueName] = {
+                        waiting: [],
+                        active: [],
+                        completed: [],
+                        failed: [],
+                        delayed: []
+                    };
+                }
+                
+                const queueData = metrics.queues[queueName];
+                if (queueData.counts) {
+                    // Add new data points
+                    queueHistory.queues[queueName].waiting.push(queueData.counts.waiting || 0);
+                    queueHistory.queues[queueName].active.push(queueData.counts.active || 0);
+                    queueHistory.queues[queueName].completed.push(queueData.counts.completed || 0);
+                    queueHistory.queues[queueName].failed.push(queueData.counts.failed || 0);
+                    queueHistory.queues[queueName].delayed.push(queueData.counts.delayed || 0);
+                    
+                    // Limit history to last 50 points
+                    if (queueHistory.queues[queueName].waiting.length > 50) {
+                        queueHistory.queues[queueName].waiting.shift();
+                        queueHistory.queues[queueName].active.shift();
+                        queueHistory.queues[queueName].completed.shift();
+                        queueHistory.queues[queueName].failed.shift();
+                        queueHistory.queues[queueName].delayed.shift();
+                    }
+                }
+            });
+            
+            updateChart();
+        }
+
+        function updateChart() {
+            const selectedQueue = elements.chartQueueSelect.value;
+            const selectedMetric = elements.chartMetricSelect.value;
+            
+            if (queueHistory.timestamps.length === 0) {
+                return;
+            }
+            
+            // Format timestamps for display
+            const labels = queueHistory.timestamps.map(ts => ts.toLocaleTimeString());
+            
+            // Prepare datasets
+            let datasets = [];
+            
+            if (selectedQueue === 'all') {
+                // Show selected metric for all queues
+                const colors = [
+                    '#4361ee', '#3a0ca3', '#7209b7', '#f72585', '#4cc9f0',
+                    '#f39c12', '#16a085', '#d35400', '#8e44ad', '#27ae60'
+                ];
+                
+                Object.keys(queueHistory.queues).forEach((queueName, index) => {
+                    datasets.push({
+                        label: queueName,
+                        data: queueHistory.queues[queueName][selectedMetric],
+                        borderColor: colors[index % colors.length],
+                        backgroundColor: colors[index % colors.length] + '20',
+                        tension: 0.4
+                    });
+                });
+            } else {
+                // Show selected metric for selected queue
+                if (queueHistory.queues[selectedQueue]) {
+                    datasets.push({
+                        label: selectedMetric,
+                        data: queueHistory.queues[selectedQueue][selectedMetric],
+                        borderColor: '#4361ee',
+                        backgroundColor: '#4361ee20',
+                        tension: 0.4
+                    });
+                }
+            }
+            
+            // Create or update chart
+            if (!chart) {
+                const ctx = document.createElement('canvas');
+                elements.historyChart.innerHTML = '';
+                elements.historyChart.appendChild(ctx);
+                
+                chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            } else {
+                chart.data.labels = labels;
+                chart.data.datasets = datasets;
+                chart.update();
+            }
+        }
+
+        function logInfo(message) {
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry log-info';
+            
+            const timestamp = new Date().toISOString();
+            
+            logEntry.innerHTML = `[${timestamp.slice(11, 19)}] <span class="tag">Info</span> ${message}`;
+            elements.debugLog.appendChild(logEntry);
+            elements.debugLog.scrollTop = elements.debugLog.scrollHeight;
+        }
+
+        function logError(message, error = null) {
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry log-error';
+            
+            const timestamp = new Date().toISOString();
+            
+            let errorDetails = '';
+            if (error) {
+                errorDetails = `: ${error.message || error}`;
+                if (error.stack) {
+                    errorDetails += `\n${error.stack}`;
+                }
+            }
+            
+            logEntry.innerHTML = `[${timestamp.slice(11, 19)}] <span class="tag">Error</span> ${message}${errorDetails}`;
+            elements.debugLog.appendChild(logEntry);
+            elements.debugLog.scrollTop = elements.debugLog.scrollHeight;
+        }
+
+        function logSuccess(message) {
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry log-success';
+            
+            const timestamp = new Date().toISOString();
+            
+            logEntry.innerHTML = `[${timestamp.slice(11, 19)}] <span class="tag">Success</span> ${message}`;
+            elements.debugLog.appendChild(logEntry);
+            elements.debugLog.scrollTop = elements.debugLog.scrollHeight;
+        }
+
+        function logWarning(message) {
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry log-warning';
+            
+            const timestamp = new Date().toISOString();
+            
+            logEntry.innerHTML = `[${timestamp.slice(11, 19)}] <span class="tag">Warning</span> ${message}`;
+            elements.debugLog.appendChild(logEntry);
+            elements.debugLog.scrollTop = elements.debugLog.scrollHeight;
+        }
+
+        // Connect to server
+        function connectToServer() {
+            // Validate inputs
+            serverUrl = elements.serverUrl.value.trim();
+            
+            if (!serverUrl) {
+                logError('Server URL is required');
+                return;
+            }
+            
+            logInfo(`Connecting to ${serverUrl}`);
+            updateConnectionStatus(true);
+        }
+
+        // Disconnect from server
+        function disconnectFromServer() {
+            logInfo('Disconnecting from server');
+            updateConnectionStatus(false);
+        }
+
+        // Fetch queue metrics
+        async function fetchQueueMetrics() {
+            if (!isConnected) {
+                logWarning('Not connected to server');
+                return;
+            }
+            
+            logInfo('Fetching queue metrics...');
+            
+            try {
+                const showCompleted = elements.showCompleted.checked;
+                const url = `${serverUrl}/api/notifications/queue-metrics?ignoreCompleted=${!showCompleted}`;
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+                }
+                
+                const metrics = await response.json();
+                
+                if (metrics.error) {
+                    logError(`Failed to fetch queue metrics: ${metrics.message}`);
+                    return;
+                }
+                
+                logSuccess('Queue metrics fetched successfully');
+                updateSystemHealth(metrics.systemHealth);
+                updateQueueList(metrics.queues);
+                storeQueueHistoryData(metrics);
+                
+            } catch (error) {
+                logError('Error fetching queue metrics', error);
+            }
+        }
+
+        // Start auto-refresh
+        function startAutoRefresh() {
+            stopAutoRefresh(); // Clear any existing interval
+            
+            const intervalSeconds = parseInt(elements.refreshInterval.value) || 30;
+            const intervalMs = intervalSeconds * 1000;
+            
+            logInfo(`Starting auto-refresh every ${intervalSeconds} seconds`);
+            
+            refreshIntervalId = setInterval(() => {
+                fetchQueueMetrics();
+            }, intervalMs);
+        }
+
+        // Stop auto-refresh
+        function stopAutoRefresh() {
+            if (refreshIntervalId) {
+                clearInterval(refreshIntervalId);
+                refreshIntervalId = null;
+                logInfo('Auto-refresh stopped');
+            }
+        }
+
+        // Clear queue list
+        function clearQueueList() {
+            elements.queueList.innerHTML = '';
+            logInfo('Queue list cleared');
+        }
+
+        // Clear debug logs
+        function clearLogs() {
+            elements.debugLog.innerHTML = '';
+            logInfo('Monitor logs cleared');
+        }
+
+        // Download logs
+        function downloadLogs() {
+            const logContent = elements.debugLog.innerText;
+            const blob = new Blob([logContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `queue-monitor-logs-${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+            
+            URL.revokeObjectURL(url);
+            
+            logInfo('Logs downloaded');
+        }
+
+        // Event listeners
+        elements.connectButton.addEventListener('click', connectToServer);
+        elements.disconnectButton.addEventListener('click', disconnectFromServer);
+        elements.refreshButton.addEventListener('click', fetchQueueMetrics);
+        
+        elements.clearQueuesButton.addEventListener('click', clearQueueList);
+        elements.clearLogsButton.addEventListener('click', clearLogs);
+        elements.downloadLogsButton.addEventListener('click', downloadLogs);
+        
+        elements.chartQueueSelect.addEventListener('change', updateChart);
+        elements.chartMetricSelect.addEventListener('change', updateChart);
+        
+        // Refresh metrics when the "show completed" checkbox changes
+        elements.showCompleted.addEventListener('change', () => {
+            if (isConnected) {
+                fetchQueueMetrics();
+            }
+        });
+        
+        // Monitor refresh interval changes
+        elements.refreshInterval.addEventListener('change', () => {
+            if (isConnected) {
+                startAutoRefresh();
+            }
+        });
+
+        // Startup logs
+        logInfo('Queue Monitor initialized');
+        logInfo('Connect to a server to begin monitoring');
+
+        // Create the /api/notifications/queue-metrics endpoint that this will call
+        logWarning('Important: This UI requires the server to implement an API endpoint at /api/notifications/queue-metrics');
+        logInfo('Make sure to implement this endpoint to expose the queue metrics data');
+    </script>
+</body>
+</html> 
