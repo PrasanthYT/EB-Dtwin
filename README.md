@@ -6,11 +6,11 @@ Dtwin is an AI-powered, full-stack health management application designed to del
 
 ## 🚀 Live Demo
 
-🔗 **Live Web App**: [https://dtwin-health.app](https://dtwin-health.app)  
+🔗 **Live Web App**: [https://dtwin-health.app](https://dtwin.netlify.app/)
 
+**NOTE:** This website is only mobile compatible.
 
 🔗 **Backend API**: [https://api.dtwin-health.app](https://api.dtwin-health.app)
-
 
 🔗 **DTwin APK**: [Download APK](https://drive.google.com/file/d/1lcvgrF0WuAXMbseI71wi1fbvrDyDSP5v/view?usp=sharing)
 
