@@ -335,7 +335,7 @@ export default function HeartDetailedReport() {
       <div className="px-4 sm:px-6 pb-8 rounded-b-[2rem]">
         <div className="flex items-center gap-4 pt-8 mb-6">
           <Button
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate("/diseaseprediction")}
             variant="outline"
             size="icon"
             className="h-12 w-12 rounded-xl border-gray-200 bg-white hover:bg-gray-50"
