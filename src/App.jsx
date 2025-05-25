@@ -76,19 +76,28 @@ const App = () => {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/starting" element={<StartingPage />} />
-        <Route path="/dashboard" element={<HealthDashboard/>}/>
-        <Route path="/chatbot" element={<Chatbot/>}/>
-        <Route path="/guthealth" element={<GutDetailedReport/>}/>
-        <Route path="/analytics" element={<AISuggestionsPage/>}/>
-        <Route path="/3d-model" element={<HealthVisualizationApp/>}/>
-        <Route path="/foodmodule" element={<FoodSection/>}/>
-        <Route path="/diseaseprediction" element={<DiseasePrediction/>}/>
-        <Route path="/dashboard/heart-detailed-report" element={<HeartDetailedReport/>}/>
-        <Route path="/dashboard/gut-detailed-report" element={<GutDetailedReport/>}/>
-        <Route path="/dashboard/pancreas-detailed-report" element={<PancreasDetailedReport/>}/>
-        <Route path="/simulation" element={<BodySimulator/>}/>
-        <Route path="/body-recovery" element={<BodyRecoveryAnalytics/>}/>
-        <Route path="/addmeds" element={<AddMeds/>}/>
+        <Route path="/dashboard" element={<HealthDashboard />} />
+        <Route path="/chatbot" element={<Chatbot />} />
+        <Route path="/guthealth" element={<GutDetailedReport />} />
+        <Route path="/analytics" element={<AISuggestionsPage />} />
+        <Route path="/3d-model" element={<HealthVisualizationApp />} />
+        <Route path="/foodmodule" element={<FoodSection />} />
+        <Route path="/diseaseprediction" element={<DiseasePrediction />} />
+        <Route
+          path="/dashboard/heart-detailed-report"
+          element={<HeartDetailedReport />}
+        />
+        <Route
+          path="/dashboard/gut-detailed-report"
+          element={<GutDetailedReport />}
+        />
+        <Route
+          path="/dashboard/pancreas-detailed-report"
+          element={<PancreasDetailedReport />}
+        />
+        <Route path="/simulation" element={<BodySimulator />} />
+        <Route path="/body-recovery" element={<BodyRecoveryAnalytics />} />
+        <Route path="/addmeds" element={<AddMeds />} />
       </Routes>
     </Router>
   );

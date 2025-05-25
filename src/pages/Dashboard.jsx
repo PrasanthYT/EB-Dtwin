@@ -249,7 +249,7 @@ const   HealthDashboard = () => {
   const heartRateZones = recentData?.activity?.summary?.heartRateZones || [];
 
   // ** Handle Navigation **
-  const handleSearchBar = () => navigate("/search");
+  const handleSearchBar = () => navigate("/foodmodule");
   const handleNavigateDP = () => navigate("/diseaseprediction");
   const handleChatBotLink = () => navigate("/chatbot");
   const handleBodyRecoveryAnalytics = () => navigate("/body-recovery");

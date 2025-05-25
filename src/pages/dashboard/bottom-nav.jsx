@@ -12,7 +12,7 @@ const BottomNav = () => {
     { id: "home", icon: Home, label: "Home", path: "/dashboard" },
     { id: "stats", icon: BarChart2, label: "Stats", path: "/analytics" },
     { id: "food", icon: Sparkles, label: "Food", path: "/foodmodule" },
-    { id: "settings", icon: Settings, label: "Settings", path: "/settings" }
+    { id: "settings", icon: Settings, label: "Settings", path: "" }
   ];
 
   return (
