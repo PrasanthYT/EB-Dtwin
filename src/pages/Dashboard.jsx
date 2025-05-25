@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import axios from "axios"
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import axios from "axios";
 import {
   Activity,
   Bell,
@@ -21,140 +21,260 @@ import {
   Brain,
   Zap,
   Star,
-} from "lucide-react"
-import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
-import Fitbit from "./Fitbit/Fitbit"
-import BottomNav from "./dashboard/bottom-nav"
-import HealthSimulation from "./dashboard/health-simulation"
-import ModelVisualizationCard from "./dashboard/health-threeD-twin"
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Fitbit from "./Fitbit/Fitbit";
+import BottomNav from "./dashboard/bottom-nav";
+import HealthSimulation from "./dashboard/health-simulation";
+import ModelVisualizationCard from "./dashboard/health-threeD-twin";
 
 const HealthDashboard = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   // ** State for User & Fitbit Data **
-  const [userData, setUserData] = useState(null)
-  const [fitbitData, setFitbitData] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [userData, setUserData] = useState(null);
+  const [fitbitData, setFitbitData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const randomBloodSugar = Math.floor(Math.random() * (180 - 70 + 1)) + 70
-
-  // ** Fetch Data on Component Mount **
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true)
-      await fetchUserData()
-      await fetchFitbitData()
-      setLoading(false)
-    }
-    fetchData()
-  }, [])
+  const randomBloodSugar = Math.floor(Math.random() * (180 - 70 + 1)) + 70;
 
   // ** Fetch User Data **
   const fetchUserData = async () => {
     try {
-      const token = sessionStorage.getItem("token")
+      const token = sessionStorage.getItem("token");
       const response = await axios.get("http://localhost:4200/api/auth/user", {
         headers: { Authorization: `Bearer ${token}` },
-      })
+      });
 
       if (response.status === 200) {
-        console.log("✅ User Data:", response.data)
-        setUserData(response.data)
+        console.log("✅ User Data:", response.data);
+        setUserData(response.data);
       }
     } catch (error) {
-      console.error("❌ Error fetching user data:", error)
+      console.error("❌ Error fetching user data:", error);
     }
-  }
+  };
 
   // ** Fetch Fitbit Data **
   const fetchFitbitData = async () => {
     try {
-      const token = sessionStorage.getItem("token")
+      const token = sessionStorage.getItem("token");
       const response = await axios.get("http://localhost:4200/api/fitbit/get", {
         headers: { Authorization: `Bearer ${token}` },
-      })
+      });
 
       if (response.status === 200) {
-        console.log("✅ Fitbit Data:", response.data)
-        setFitbitData(response.data)
+        console.log("✅ Fitbit Data:", response.data);
+        setFitbitData(response.data);
       }
     } catch (error) {
-      console.error("❌ Error fetching Fitbit data:", error)
+      console.error("❌ Error fetching Fitbit data:", error);
     }
-  }
+  };
 
-  const email = userData?.user?.username || ""
-  const extractedName = email.split("@")[0]
-  const username = userData?.user?.name || extractedName || "User"
-  const healthScore = userData?.user?.healthData?.healthScore || "--"
-  const userId = userData?.user?.userId
+  // ** State for Health Metrics **
+  const [healthMetrics, setHealthMetrics] = useState({
+    heartRate: null,
+    bloodSugar: null,
+    sleep: null,
+    steps: null,
+  });
+
+  // ** Fetch Health Metrics Data **
+  const fetchHealthMetrics = async () => {
+    try {
+      const token = sessionStorage.getItem("token");
+      const today = new Date().toISOString().split("T")[0];
+
+      // Fetch heart rate data
+      const heartRateResponse = await axios.get(
+        `http://localhost:4000/api/health-metrics/heart?date=${today}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Fetch steps data
+      const stepsResponse = await axios.get(
+        `http://localhost:4000/api/health-metrics?date=${today}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Fetch sleep data (you might need to adjust this endpoint)
+      const sleepResponse = await axios.get(
+        `http://localhost:4000/api/sleep?date=${today}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setHealthMetrics({
+        heartRate: heartRateResponse.data?.data || generateFallbackHeartRate(),
+        bloodSugar: generateFallbackBloodSugar(), // Typically not from Fitbit
+        sleep: sleepResponse.data?.data?.[0] || generateFallbackSleep(),
+        steps: stepsResponse.data?.data || generateFallbackSteps(),
+      });
+    } catch (error) {
+      console.error("Error fetching health metrics:", error);
+      // Use fallback data if API fails
+      setHealthMetrics({
+        heartRate: generateFallbackHeartRate(),
+        bloodSugar: generateFallbackBloodSugar(),
+        sleep: generateFallbackSleep(),
+        steps: generateFallbackSteps(),
+      });
+    }
+  };
+
+  // ** Fallback Data Generators **
+  const generateFallbackHeartRate = () => ({
+    resting_heart_rate: Math.floor(Math.random() * (75 - 60 + 1)) + 60,
+    min_heart_rate: Math.floor(Math.random() * (60 - 50 + 1)) + 50,
+    max_heart_rate: Math.floor(Math.random() * (120 - 100 + 1)) + 100,
+    heart_rate_data: Array.from({ length: 24 }, (_, i) => ({
+      time: `${i}:00`,
+      value: Math.floor(Math.random() * (100 - 60 + 1)) + 60,
+    })),
+  });
+
+  const generateFallbackBloodSugar = () =>
+    Math.floor(Math.random() * (180 - 70 + 1)) + 70;
+
+  const generateFallbackSleep = () => ({
+    minutesAsleep: Math.floor(Math.random() * (480 - 360 + 1)) + 360, // 6-8 hours
+    efficiency: Math.floor(Math.random() * (95 - 80 + 1)) + 80,
+    sleepStages: [
+      { stageType: "LIGHT", durationSeconds: 18000 }, // 5 hours
+      { stageType: "DEEP", durationSeconds: 7200 }, // 2 hours
+      { stageType: "REM", durationSeconds: 5400 }, // 1.5 hours
+    ],
+  });
+
+  const generateFallbackSteps = () => ({
+    total_steps: Math.floor(Math.random() * (10000 - 4000 + 1)) + 4000,
+    distance_covered: (Math.random() * 8 + 2).toFixed(1), // 2-10 km
+  });
+
+  // Helper to generate heart rate path for SVG
+  const generateHeartRatePath = (data) => {
+    if (!data || data.length === 0) return "M0 12 L100 12";
+
+    const points = data.map((item, i) => {
+      const x = (i / (data.length - 1)) * 100;
+      // Normalize heart rate value to fit in the SVG (assuming 40-120 BPM range)
+      const y = 24 - ((item.value - 40) / 80) * 24;
+      return `${x} ${y}`;
+    });
+
+    return `M${points.join(" L")}`;
+  };
+
+  // Helper to get color for sleep stages
+  const getSleepStageColor = (stageType) => {
+    switch (stageType) {
+      case "DEEP":
+        return "rgba(56, 182, 255, 0.7)";
+      case "REM":
+        return "rgba(168, 85, 247, 0.7)";
+      case "AWAKE":
+        return "rgba(248, 113, 113, 0.7)";
+      default:
+        return "rgba(255, 255, 255, 0.4)"; // LIGHT
+    }
+  };
+
+  // Add to your useEffect to fetch metrics
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      await fetchUserData();
+      await fetchFitbitData();
+      await fetchHealthMetrics(); // Add this line
+      setLoading(false);
+    };
+    fetchData();
+  }, []);
+
+  const email = userData?.user?.username || "";
+  const extractedName = email.split("@")[0];
+  const username = userData?.user?.name || extractedName || "User";
+  const healthScore = userData?.user?.healthData?.healthScore || "--";
+  const userId = userData?.user?.userId;
 
   // ✅ Get Weekly Data
-  const weeklyData = fitbitData?.data?.weeklyData || []
+  const weeklyData = fitbitData?.data?.weeklyData || [];
 
   // ✅ Sort weeklyData by date (latest first)
-  const sortedWeeklyData = [...weeklyData].sort((a, b) => new Date(b.date) - new Date(a.date))
+  const sortedWeeklyData = [...weeklyData].sort(
+    (a, b) => new Date(b.date) - new Date(a.date)
+  );
 
   // ✅ Get Today's Date
-  const today = new Date().toISOString().split("T")[0]
+  const today = new Date().toISOString().split("T")[0];
 
   // ✅ Find the Most Recent Data Entry
-  const recentData = sortedWeeklyData.find((day) => new Date(day.date) <= new Date(today))
+  const recentData = sortedWeeklyData.find(
+    (day) => new Date(day.date) <= new Date(today)
+  );
 
   // ✅ Extract Heart Rate Details
-  const recentRestingHeartRate = recentData?.activity?.summary?.restingHeartRate || "--"
+  const recentRestingHeartRate =
+    recentData?.activity?.summary?.restingHeartRate || "--";
 
   // ✅ Extract Sleep Data (Check if sleepRecords exist)
-  const recentSleepData = sortedWeeklyData.find((day) => day.sleep?.sleepRecords?.length > 0)
-  const recentSleepRecord = recentSleepData?.sleep?.sleepRecords?.[0] || null
+  const recentSleepData = sortedWeeklyData.find(
+    (day) => day.sleep?.sleepRecords?.length > 0
+  );
+  const recentSleepRecord = recentSleepData?.sleep?.sleepRecords?.[0] || null;
 
   const recentSleepDuration = recentSleepRecord?.minutesAsleep
     ? (recentSleepRecord.minutesAsleep / 60).toFixed(1) // Convert minutes to hours
-    : "--"
+    : "--";
 
-  const recentSleepEfficiency = recentSleepRecord?.efficiency || "--"
+  const recentSleepEfficiency = recentSleepRecord?.efficiency || "--";
 
   // ✅ Extract Activity Data
-  const recentDailySteps = recentData?.activity?.summary?.steps?.toLocaleString() || "--" // Format Steps
-  const recentActiveMinutes = recentData?.activity?.summary?.lightlyActiveMinutes || 0
+  const recentDailySteps =
+    recentData?.activity?.summary?.steps?.toLocaleString() || "--"; // Format Steps
+  const recentActiveMinutes =
+    recentData?.activity?.summary?.lightlyActiveMinutes || 0;
 
   // ✅ Extract Total Distance
-  const totalDistance = recentData?.activity?.summary?.distances?.find((d) => d.activity === "total")?.distance || "--"
+  const totalDistance =
+    recentData?.activity?.summary?.distances?.find(
+      (d) => d.activity === "total"
+    )?.distance || "--";
 
   // ✅ Extract Calories Burned
-  const caloriesBurned = recentData?.activity?.summary?.caloriesOut || "--"
+  const caloriesBurned = recentData?.activity?.summary?.caloriesOut || "--";
 
   // ✅ Extract Heart Rate Zones
-  const heartRateZones = recentData?.activity?.summary?.heartRateZones || []
+  const heartRateZones = recentData?.activity?.summary?.heartRateZones || [];
 
   // ** Handle Navigation **
-  const handleWellnessAI = () => navigate("/wellnessai")
-  const handleSearchBar = () => navigate("/search")
+  const handleWellnessAI = () => navigate("/wellnessai");
+  const handleSearchBar = () => navigate("/search");
 
-  const handleHeartRate = () => navigate("/heartratemonitor")
-  const handleHealthScore = () => navigate("/healthscore")
-  const handleAddMeds = () => navigate("/addmeds")
-  const handleHealthBloodSugar = () => navigate("/healthbloodsugar")
+  const handleHeartRate = () => navigate("/heartratemonitor");
+  const handleHealthScore = () => navigate("/healthscore");
+  const handleAddMeds = () => navigate("/addmeds");
+  const handleHealthBloodSugar = () => navigate("/healthbloodsugar");
 
   const handleRemoveMed = async (medication) => {
     try {
-      const token = sessionStorage.getItem("token")
+      const token = sessionStorage.getItem("token");
       await axios.post(
         "http://localhost:4200/api/auth/remove-medication",
         { medication },
-        { headers: { Authorization: `Bearer ${token}` } },
-      )
-      fetchUserData() // Refresh user data after removing
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      fetchUserData(); // Refresh user data after removing
     } catch (error) {
-      console.error("❌ Error removing medication:", error)
+      console.error("❌ Error removing medication:", error);
     }
-  }
+  };
 
   const handleLogout = () => {
-    sessionStorage.removeItem("token") // ✅ Remove token
-    navigate("/signin") // ✅ Redirect to login page
-  }
+    sessionStorage.removeItem("token"); // ✅ Remove token
+    navigate("/signin"); // ✅ Redirect to login page
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 overflow-x-hidden">
@@ -197,7 +317,9 @@ const HealthDashboard = () => {
                   <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-slate-900 animate-pulse"></div>
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-white">Hi, {username}!</h1>
+                  <h1 className="text-2xl font-bold text-white">
+                    Hi, {username}!
+                  </h1>
                   <div className="flex items-center gap-2 mt-1">
                     <Sparkles className="w-4 h-4 text-yellow-400" />
                     <span className="text-sm text-slate-300">Pro Member</span>
@@ -227,7 +349,9 @@ const HealthDashboard = () => {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <h2 className="text-xl font-bold text-gray-900">AI Health Features</h2>
+                <h2 className="text-xl font-bold text-gray-900">
+                  AI Health Features
+                </h2>
                 <div className="flex items-center gap-1">
                   <Star className="w-4 h-4 text-yellow-500 fill-current" />
                   <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full font-medium">
@@ -256,9 +380,12 @@ const HealthDashboard = () => {
                       </span>
                     </div>
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Disease Prediction</h3>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    Disease Prediction
+                  </h3>
                   <p className="text-sm text-gray-600 mb-3">
-                    Advanced AI algorithms analyze your health data to predict potential health risks
+                    Advanced AI algorithms analyze your health data to predict
+                    potential health risks
                   </p>
                   <div className="flex items-center justify-between">
                     <span className="text-sm bg-red-500 text-white px-3 py-1 rounded-full font-medium">
@@ -266,7 +393,9 @@ const HealthDashboard = () => {
                     </span>
                     <div className="flex items-center gap-1 text-red-600">
                       <Brain className="w-4 h-4" />
-                      <span className="text-xs font-medium">Smart Analysis</span>
+                      <span className="text-xs font-medium">
+                        Smart Analysis
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -279,8 +408,12 @@ const HealthDashboard = () => {
                   <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-md">
                     <Heart className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="font-bold text-gray-900 text-sm mb-1">Gut Health</h3>
-                  <p className="text-xs text-gray-600 mb-3">Microbiome tracking & analysis</p>
+                  <h3 className="font-bold text-gray-900 text-sm mb-1">
+                    Gut Health
+                  </h3>
+                  <p className="text-xs text-gray-600 mb-3">
+                    Microbiome tracking & analysis
+                  </p>
                   <div className="flex items-center justify-between">
                     <span className="text-xs bg-green-500 text-white px-2 py-1 rounded-full font-medium">
                       88% Health
@@ -299,10 +432,16 @@ const HealthDashboard = () => {
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-md">
                     <MessageSquare className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="font-bold text-gray-900 text-sm mb-1">Mental Chatbot</h3>
-                  <p className="text-xs text-gray-600 mb-3">24/7 mental wellness support</p>
+                  <h3 className="font-bold text-gray-900 text-sm mb-1">
+                    Mental Chatbot
+                  </h3>
+                  <p className="text-xs text-gray-600 mb-3">
+                    24/7 mental wellness support
+                  </p>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs bg-blue-500 text-white px-2 py-1 rounded-full font-medium">Online</span>
+                    <span className="text-xs bg-blue-500 text-white px-2 py-1 rounded-full font-medium">
+                      Online
+                    </span>
                     <div className="flex gap-1">
                       <div className="w-1 h-3 bg-blue-300 rounded-full animate-pulse"></div>
                       <div
@@ -333,7 +472,9 @@ const HealthDashboard = () => {
                       <TrendingUp className="w-4 h-4 text-orange-600" />
                     </div>
                   </div>
-                  <h3 className="font-bold text-gray-900 mb-1">Body Recovery Analytics</h3>
+                  <h3 className="font-bold text-gray-900 mb-1">
+                    Body Recovery Analytics
+                  </h3>
                   <p className="text-xs text-gray-600 mb-3">
                     Track your body's recovery patterns and optimize performance
                   </p>
@@ -342,7 +483,10 @@ const HealthDashboard = () => {
                       <div
                         key={i}
                         className="flex-1 bg-orange-200 rounded-sm group-hover:bg-orange-300 transition-colors"
-                        style={{ height: `${30 + (i % 4) * 20}%`, alignSelf: "flex-end" }}
+                        style={{
+                          height: `${30 + (i % 4) * 20}%`,
+                          alignSelf: "flex-end",
+                        }}
                       ></div>
                     ))}
                   </div>
@@ -360,7 +504,9 @@ const HealthDashboard = () => {
 
           {/* Health Score */}
           <div className="mb-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Your Health Overview</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
+              Your Health Overview
+            </h2>
             <Card
               className="bg-gradient-to-br from-white to-blue-50 rounded-3xl border border-blue-200 p-6 cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
               onClick={handleHealthScore}
@@ -371,17 +517,29 @@ const HealthDashboard = () => {
                     <span className="text-3xl font-bold">{healthScore}</span>
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900">Metabolic Score</h3>
-                    <p className="text-gray-600 text-sm mt-1">Your health status is above average</p>
+                    <h3 className="text-xl font-bold text-gray-900">
+                      Metabolic Score
+                    </h3>
+                    <p className="text-gray-600 text-sm mt-1">
+                      Your health status is above average
+                    </p>
                     <div className="flex items-center gap-2 mt-2">
                       <TrendingUp className="w-4 h-4 text-emerald-500" />
-                      <span className="text-emerald-600 text-sm font-medium">Improving</span>
-                      <span className="text-xs bg-emerald-100 text-emerald-600 px-2 py-1 rounded-full">+5%</span>
+                      <span className="text-emerald-600 text-sm font-medium">
+                        Improving
+                      </span>
+                      <span className="text-xs bg-emerald-100 text-emerald-600 px-2 py-1 rounded-full">
+                        +5%
+                      </span>
                     </div>
                   </div>
                 </div>
                 <div className="text-gray-400 group-hover:text-blue-500 transition-colors">
-                  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                  <svg
+                    className="w-8 h-8"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
                     <path
                       fillRule="evenodd"
                       d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
@@ -400,6 +558,7 @@ const HealthDashboard = () => {
               <div className="w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
             </div>
             <div className="grid grid-cols-2 gap-4">
+              {/* Heart Rate Card */}
               <Card
                 onClick={handleHeartRate}
                 className="bg-gradient-to-br from-red-500 to-red-600 text-white border-0 p-5 rounded-2xl cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
@@ -410,13 +569,21 @@ const HealthDashboard = () => {
                 </div>
                 <h3 className="text-sm font-medium opacity-90">Heart Rate</h3>
                 <div className="flex items-baseline gap-1 mt-2">
-                  <span className="text-2xl font-bold">74</span>
+                  <span className="text-2xl font-bold">
+                    {healthMetrics.heartRate?.resting_heart_rate || "--"}
+                  </span>
                   <span className="text-xs opacity-80">BPM</span>
                 </div>
                 <div className="mt-3 h-6">
                   <svg className="w-full h-full" viewBox="0 0 100 24">
                     <path
-                      d="M0 12 L15 12 L20 4 L25 20 L30 12 L45 12 L50 4 L55 20 L60 12 L75 12 L80 4 L85 20 L90 12 L100 12"
+                      d={
+                        healthMetrics.heartRate?.heart_rate_data
+                          ? generateHeartRatePath(
+                              healthMetrics.heartRate.heart_rate_data
+                            )
+                          : "M0 12 L15 12 L20 4 L25 20 L30 12 L45 12 L50 4 L55 20 L60 12 L75 12 L80 4 L85 20 L90 12 L100 12"
+                      }
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="2"
@@ -426,6 +593,7 @@ const HealthDashboard = () => {
                 </div>
               </Card>
 
+              {/* Blood Sugar Card */}
               <Card
                 onClick={handleHealthBloodSugar}
                 className="bg-gradient-to-br from-orange-500 to-orange-600 text-white border-0 p-5 rounded-2xl cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
@@ -434,41 +602,75 @@ const HealthDashboard = () => {
                   <Activity className="w-6 h-6 group-hover:scale-110 transition-transform" />
                   <div
                     className={`w-2 h-2 rounded-full animate-pulse ${
-                      randomBloodSugar > 140 ? "bg-red-300" : randomBloodSugar < 90 ? "bg-yellow-300" : "bg-green-300"
+                      healthMetrics.bloodSugar > 140
+                        ? "bg-red-300"
+                        : healthMetrics.bloodSugar < 90
+                        ? "bg-yellow-300"
+                        : "bg-green-300"
                     }`}
                   ></div>
                 </div>
                 <h3 className="text-sm font-medium opacity-90">Blood Sugar</h3>
                 <div className="flex items-baseline gap-1 mt-2">
-                  <span className="text-2xl font-bold">{randomBloodSugar}</span>
+                  <span className="text-2xl font-bold">
+                    {healthMetrics.bloodSugar || "--"}
+                  </span>
                   <span className="text-xs opacity-80">mg/dL</span>
                 </div>
                 <div className="mt-3 text-center bg-white/20 rounded-xl py-1 text-xs font-medium">
-                  {randomBloodSugar > 140 ? "High" : randomBloodSugar < 90 ? "Low" : "Normal"}
+                  {healthMetrics.bloodSugar > 140
+                    ? "High"
+                    : healthMetrics.bloodSugar < 90
+                    ? "Low"
+                    : "Normal"}
                 </div>
               </Card>
 
+              {/* Sleep Card */}
               <Card className="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white border-0 p-5 rounded-2xl cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
                 <div className="flex items-center justify-between mb-3">
                   <Moon className="w-6 h-6 group-hover:scale-110 transition-transform" />
                   <div className="w-2 h-2 bg-blue-300 rounded-full animate-pulse"></div>
                 </div>
-                <h3 className="text-sm font-medium opacity-90">Sleep Quality</h3>
+                <h3 className="text-sm font-medium opacity-90">
+                  Sleep Quality
+                </h3>
                 <div className="flex items-baseline gap-1 mt-2">
-                  <span className="text-2xl font-bold">{recentSleepDuration}</span>
+                  <span className="text-2xl font-bold">
+                    {healthMetrics.sleep?.minutesAsleep
+                      ? (healthMetrics.sleep.minutesAsleep / 60).toFixed(1)
+                      : "--"}
+                  </span>
                   <span className="text-xs opacity-80">hrs</span>
                 </div>
                 <div className="flex justify-between mt-3 h-6 gap-1">
-                  {[...Array(7)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="w-1 bg-white/40 rounded-full group-hover:bg-white/60 transition-colors"
-                      style={{ height: `${60 + (i % 3) * 20}%` }}
-                    ></div>
-                  ))}
+                  {healthMetrics.sleep?.sleepStages?.length > 0
+                    ? healthMetrics.sleep.sleepStages.map((stage, i) => (
+                        <div
+                          key={i}
+                          className="w-1 bg-white/40 rounded-full group-hover:bg-white/60 transition-colors"
+                          style={{
+                            height: `${Math.min(
+                              100,
+                              stage.durationSeconds / 180
+                            )}%`,
+                            backgroundColor: getSleepStageColor(
+                              stage.stageType
+                            ),
+                          }}
+                        ></div>
+                      ))
+                    : [...Array(7)].map((_, i) => (
+                        <div
+                          key={i}
+                          className="w-1 bg-white/40 rounded-full group-hover:bg-white/60 transition-colors"
+                          style={{ height: `${60 + (i % 3) * 20}%` }}
+                        ></div>
+                      ))}
                 </div>
               </Card>
 
+              {/* Steps Card */}
               <Card className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-0 p-5 rounded-2xl cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
                 <div className="flex items-center justify-between mb-3">
                   <Target className="w-6 h-6 group-hover:scale-110 transition-transform" />
@@ -476,11 +678,24 @@ const HealthDashboard = () => {
                 </div>
                 <h3 className="text-sm font-medium opacity-90">Daily Steps</h3>
                 <div className="flex items-baseline gap-1 mt-2">
-                  <span className="text-2xl font-bold">4.1K</span>
+                  <span className="text-2xl font-bold">
+                    {healthMetrics.steps?.total_steps
+                      ? Math.floor(healthMetrics.steps.total_steps / 1000) + "K"
+                      : "--"}
+                  </span>
                   <span className="text-xs opacity-80">steps</span>
                 </div>
                 <div className="mt-3 bg-white/20 rounded-full h-2">
-                  <div className="bg-white rounded-full h-2 w-3/4 group-hover:w-4/5 transition-all duration-300"></div>
+                  <div
+                    className="bg-white rounded-full h-2 transition-all duration-300"
+                    style={{
+                      width: `${
+                        healthMetrics.steps?.total_steps
+                          ? Math.min(100, healthMetrics.steps.total_steps / 100)
+                          : 75
+                      }%`,
+                    }}
+                  ></div>
                 </div>
               </Card>
             </div>
@@ -521,8 +736,12 @@ const HealthDashboard = () => {
                           <Activity className="w-6 h-6 text-blue-600" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-gray-900">{med.name}</h3>
-                          <p className="text-sm text-gray-500">{med.category}</p>
+                          <h3 className="font-semibold text-gray-900">
+                            {med.name}
+                          </h3>
+                          <p className="text-sm text-gray-500">
+                            {med.category}
+                          </p>
                         </div>
                       </div>
                       <Button
@@ -542,7 +761,9 @@ const HealthDashboard = () => {
                     <Plus className="w-8 h-8 text-gray-500" />
                   </div>
                   <p className="text-gray-500 mb-2">No medications added yet</p>
-                  <p className="text-sm text-gray-400">Add your medications to track them</p>
+                  <p className="text-sm text-gray-400">
+                    Add your medications to track them
+                  </p>
                 </Card>
               )}
             </div>
@@ -553,7 +774,7 @@ const HealthDashboard = () => {
       {/* Bottom Navigation */}
       <BottomNav />
     </div>
-  )
-}
+  );
+};
 
-export default HealthDashboard
+export default HealthDashboard;
