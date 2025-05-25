@@ -32,6 +32,8 @@ import AISuggestionsPage from "./pages/dashboard/ai-suggestions-page";
 import Chatbot from "./pages/ai/chatbot";
 import GutDetailedReport from "./pages/dashboard/gut-detailed-report";
 import FoodSection from "./pages/dashboard/food-section";
+import BottomNav from "./pages/dashboard/bottom-nav";
+import FoodScanner from "./pages/dashboard/food-scanner";
 import DiseasePrediction from "./pages/dashboard/disease-prediction";
 import HeartDetailedReport from "./pages/dashboard/heart-detailed-report";
 import PancreasDetailedReport from "./pages/dashboard/pancreas-detailed-report";
@@ -69,6 +71,7 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/foodscan" element={<FoodScanner />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/onboarding" element={<Onboarding />} />
