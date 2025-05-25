@@ -281,9 +281,7 @@ const AISuggestionsPage = () => {
     return shuffled.slice(0, count);
   };
 
-  const handleBackButtonClick = () => {
-    navigate("/dashboard"); // Navigate back to the previous page
-  };
+  const handleBackButtonClick = () => navigate("/dashboard");
 
   // Function to get random meal for each time
   const getRandomMeal = (mealType) => {
@@ -618,11 +616,11 @@ const AISuggestionsPage = () => {
 
         {/* Header content */}
         <div className="px-6 py-6">
-          <div className="flex items-center gap-4 mb-6" onClick={handleBackButtonClick}>
+          <div className="flex items-center gap-4 mb-6">
             <button
-              className="p-3 rounded-xl border border-white/20 hover:bg-white/10 transition-colors"
+              className="p-3 rounded-xl border border-white/20 hover:bg-white/10 transition-colors z-50"
             >
-              <ArrowLeft size={20} />
+              <ArrowLeft onClick={handleBackButtonClick} size={20} />
             </button>
           </div>
           <h1 className="text-3xl font-bold mb-8">AI Health Suggestions</h1>
