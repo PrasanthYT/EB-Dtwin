@@ -382,17 +382,18 @@ export default function PancreasDetailedReport() {
               {/* Center - Heart with Arrows */}
               <div className="relative flex justify-center">
                 {/* Arrow from left pointing to bottom of heart */}
-                <div className="absolute left-3 bottom-12 transform -translate-x-8">
+                <div className="absolute left-3 bottom-0 transform -translate-x-8">
                   <div className="flex items-center">
                     <div className="w-6 h-0.5 bg-red-300"></div>
-                    <ArrowRight className="h-4 w-4 text-red-500" />
+                    <ArrowUp className="h-4 w-4 text-red-500" />
                   </div>
                 </div>
 
                 {/* Heart */}
+                  <img src="/pancreas.png" alt="" />
 
                 {/* Arrow from right pointing to top of heart */}
-                <div className="absolute right-3 top-12 transform translate-x-8">
+                <div className="absolute right-3 top-0 transform translate-x-8">
                   <div className="flex items-center">
                     <ArrowDown className="h-4 w-4 text-blue-500" />
                     <div className="w-6 h-0.5 bg-blue-300"></div>
@@ -451,11 +452,6 @@ export default function PancreasDetailedReport() {
               </div>
 
               {/* Pancreas - Center */}
-              <div className="flex justify-center pt-16 pb-16">
-                <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-orange-100 to-yellow-100 rounded-full flex items-center justify-center text-4xl sm:text-5xl hover:scale-105 transition-transform duration-300 shadow-lg">
-                  🥞
-                </div>
-              </div>
 
               {/* Heart Rate & Food - Bottom Left (offset down) */}
               <div className="absolute bottom-0 left-1/4 transform -translate-x-1/2 translate-y-16">
