@@ -29,7 +29,12 @@ import HealthBloodSugar from "./pages/dashboard/health-blood-sugar";
 import BodySimulator from "./pages/Simulation";
 import HealthVisualizationApp from "./pages/dashboard/three-d-model";
 import AISuggestionsPage from "./pages/dashboard/ai-suggestions-page";
+import Chatbot from "./pages/ai/chatbot";
+import GutDetailedReport from "./pages/dashboard/gut-detailed-report";
 import FoodSection from "./pages/dashboard/food-section";
+import DiseasePrediction from "./pages/dashboard/disease-prediction";
+import HeartDetailedReport from "./pages/dashboard/heart-detailed-report";
+import PancreasDetailedReport from "./pages/dashboard/pancreas-detailed-report";
 
 // ✅ PublicRoute to prevent signed-in users from accessing auth pages
 // const PublicRoute = ({ children }) => {
@@ -62,7 +67,17 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<AISuggestionsPage/>}/>
+        <Route path="/dashboard" element={<HealthDashboard/>}/>
+        <Route path="/chatbot" element={<Chatbot/>}/>
+        <Route path="/guthealth" element={<GutDetailedReport/>}/>
+        <Route path="/analytics" element={<AISuggestionsPage/>}/>
+        <Route path="/3d-model" element={<HealthVisualizationApp/>}/>
+        <Route path="/foodmodule" element={<FoodSection/>}/>
+        <Route path="/diseaseprediction" element={<DiseasePrediction/>}/>
+        <Route path="/dashboard/heart-detailed-report" element={<HeartDetailedReport/>}/>
+        <Route path="/dashboard/gut-detailed-report" element={<GutDetailedReport/>}/>
+        <Route path="/dashboard/pancreas-detailed-report" element={<PancreasDetailedReport/>}/>
+        <Route path="/simulation" element={<BodySimulator/>}/>
       </Routes>
     </Router>
   );

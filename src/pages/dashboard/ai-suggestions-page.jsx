@@ -12,12 +12,14 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
+import { useNavigate } from "react-router-dom";
 
 const AISuggestionsPage = () => {
   const [expandedMeal, setExpandedMeal] = useState(null);
   const [expandedActivity, setExpandedActivity] = useState(null);
   const [randomMeals, setRandomMeals] = useState({});
   const [randomActivities, setRandomActivities] = useState([]);
+  const navigate = useNavigate();
 
   // Extended meal data pool
   const allMealsData = {
@@ -240,8 +242,7 @@ const AISuggestionsPage = () => {
       instructions:
         "Focus on core strengthening exercises with controlled movements and breathing.",
       benefits: "Improves core stability, posture, and body awareness.",
-      image:
-        "https://cdn.mos.cms.futurecdn.net/dGHTTd9e3gjtkz7Rjqifr6.jpg",
+      image: "https://cdn.mos.cms.futurecdn.net/dGHTTd9e3gjtkz7Rjqifr6.jpg",
     },
     {
       id: "hiit",
@@ -278,6 +279,10 @@ const AISuggestionsPage = () => {
   const getRandomItems = (array, count) => {
     const shuffled = [...array].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
+  };
+
+  const handleBackButtonClick = () => {
+    navigate("/dashboard"); // Navigate back to the previous page
   };
 
   // Function to get random meal for each time
@@ -535,10 +540,6 @@ const AISuggestionsPage = () => {
     );
   };
 
-  const handleBackClick = () => {
-    window.history.back();
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -646,7 +647,7 @@ const AISuggestionsPage = () => {
         <div className="px-6 py-6">
           <div className="flex items-center gap-4 mb-6">
             <button
-              onClick={handleBackClick}
+              onClick={handleBackButtonClick}
               className="p-3 rounded-xl border border-white/20 hover:bg-white/10 transition-colors"
             >
               <ArrowLeft size={20} />

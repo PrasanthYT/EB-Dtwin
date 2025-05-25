@@ -12,6 +12,7 @@ import {
   Brain,
   X
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([
@@ -35,10 +36,13 @@ const Chatbot = () => {
   const chatContainerRef = useRef(null);
 
   const hasSetNameRef = useRef(false);
+  const navigate = useNavigate();
 
   const toggleChat = () => {
     console.log("Toggling chat. isExpanded:", isExpanded);
-    setIsExpanded(!isExpanded);
+    // setIsExpanded(!isExpanded);
+    navigate('/dashboard')
+
   };
 
   const handleSend = async (text) => {
