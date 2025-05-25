@@ -25,3 +25,4 @@ dist-ssr
 *.sln
 *.sw?
 .env
+public/model/3d-vh-m-united.glb
