@@ -70,8 +70,8 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
         <Route path="/foodscan" element={<FoodScanner />} />
+        <Route path="/" element={<StartingPage />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/onboarding" element={<Onboarding />} />
@@ -88,6 +88,7 @@ const App = () => {
         <Route path="/dashboard/pancreas-detailed-report" element={<PancreasDetailedReport/>}/>
         <Route path="/simulation" element={<BodySimulator/>}/>
         <Route path="/body-recovery" element={<BodyRecoveryAnalytics/>}/>
+        <Route path="/addmeds" element={<AddMeds/>}/>
       </Routes>
     </Router>
   );

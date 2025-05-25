@@ -124,9 +124,6 @@ const BodyRecoveryAnalytics = () => {
             </Button>
             <div>
               <h1 className="text-2xl font-bold">Body Recovery Analytics</h1>
-              <p className="text-slate-300 text-sm mt-1">
-                Advanced recovery insights powered by DTwin AI
-              </p>
             </div>
           </div>
 
@@ -310,15 +307,12 @@ const BodyRecoveryAnalytics = () => {
         {/* Detailed Analytics Tabs */}
         <Card className="bg-white border border-gray-200 rounded-3xl p-6 shadow-lg">
           <Tabs defaultValue="daily" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-6">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="daily" className="rounded-xl">
                 Daily Pattern
               </TabsTrigger>
               <TabsTrigger value="training" className="rounded-xl">
                 Training Load
-              </TabsTrigger>
-              <TabsTrigger value="factors" className="rounded-xl">
-                Recovery Factors
               </TabsTrigger>
             </TabsList>
 

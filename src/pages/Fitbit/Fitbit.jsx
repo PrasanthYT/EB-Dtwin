@@ -7,7 +7,7 @@ import { CheckCircle, Loader2, RefreshCcw, Link, Watch } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
-const BASE_URL = "http://localhost:4000/api/connect/fitbit"; // Adjust to your backend URL
+const BASE_URL = "https://test-prod-f427.onrender.com/api/connect/fitbit"; // Adjust to your backend URL
 
 export default function Fitbit() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);

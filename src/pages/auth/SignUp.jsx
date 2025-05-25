@@ -27,7 +27,7 @@ export default function SignUp() {
     setLoading(true);
     try {
       const response = await fetch(
-        "http://localhost:4000/api/users/email/initiate-signup",
+        "https://test-prod-f427.onrender.com/api/users/email/initiate-signup",
         {
           method: "POST",
           headers: {
@@ -66,7 +66,7 @@ export default function SignUp() {
     setLoading(true);
     try {
       const response = await fetch(
-        "http://localhost:4000/api/users/email/complete-signup",
+        "https://test-prod-f427.onrender.com/api/users/email/complete-signup",
         {
           method: "POST",
           headers: {

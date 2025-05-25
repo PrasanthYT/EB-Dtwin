@@ -173,9 +173,10 @@ const FoodScanner = () => {
 
     try {
       // Get the token from wherever you store it (localStorage, context, etc.)
-      const token = localStorage.getItem("authToken"); // or from your auth context
+      const token = sessionStorage.getItem("token");
+      if (!token) throw new Error("No authentication token found");
 
-      const response = await fetch("http://localhost:4000/api/food/scan", {
+      const response = await fetch("https://test-prod-f427.onrender.com/api/food/scan", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

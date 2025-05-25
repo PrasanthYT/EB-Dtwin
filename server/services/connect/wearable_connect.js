@@ -3,7 +3,7 @@ const userProfileService = require("../../services/user/userProfileService");
 const { info, errorLog, warn, debug } = require("@dtwin/config");
 const { estimateCaloriesBurned } = require("@dtwin/ml-score-function");
 const timezoneUtils = require("../../common/utils/timezone");
-const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:4000/api";
+const API_BASE_URL = process.env.API_BASE_URL || "https://test-prod-f427.onrender.com/api";
 
 const createErrorResponse = (code, message, error, details = {}) => {
   errorLog(`Wearable Connect Error [${code}]: ${message}`, error);
