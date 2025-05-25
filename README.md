@@ -17,13 +17,13 @@ Dtwin is an AI-powered, full-stack health management application designed to del
 
 ## 📸 App Screenshots
 
-| 🧭 Dashboard | 🧬 Health Prediction | 🍱 Meal Plan | 🏃 Activity Insights |
+| 🫀 Heart Analytics | 🤖 AI Insights | 🩺 Disease Prediction |
 |:-----------:|:-------------------:|:------------:|:-------------------:|
-| ![](./public/screenshots/1.jpg) | ![](./public/screenshots/2.jpg) | ![](./public/screenshots/3.jpg) | ![](./public/screenshots/4.jpg) |
+| ![](./public/screenshots/5.jpg) | ![](./public/screenshots/2.jpg) | ![](./public/screenshots/4.jpg) |
 
-| 💤 Sleep Tracker | 🔗 Wearable Sync | 📊 Analytics Overview |   |
+| 📊 Recovery Dashboard | 🔎 Gut Analysis | 📈 Health Overview |   |
 |:---------------:|:----------------:|:----------------------:|:-:|
-| ![](./public/screenshots/5.jpg) | ![](./public/screenshots/6.jpg) | ![](./public/screenshots/7.jpg) |   |
+| ![](./public/screenshots/1.jpg) | ![](./public/screenshots/6.jpg) | ![](./public/screenshots/7.jpg) |   |
 
 ---
 
