@@ -254,6 +254,7 @@ const   HealthDashboard = () => {
   const handleNavigateDP = () => navigate("/diseaseprediction");
   const handleChatBotLink = () => navigate("/chatbot");
   const handleHeartRate = () => navigate("/heartratemonitor");
+  const handleBodyRecoveryAnalytics = () => navigate("/body-recovery");
   const handleHealthScore = () => navigate("/healthscore");
   const handleAddMeds = () => navigate("/addmeds");
   const handleHealthBloodSugar = () => navigate("/healthbloodsugar");
@@ -460,7 +461,7 @@ const   HealthDashboard = () => {
               </Card>
 
               {/* Body Recovery Graph */}
-              <Card className="col-span-2 bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 p-5 rounded-2xl hover:shadow-lg hover:border-orange-300 hover:-translate-y-1 transition-all duration-300 cursor-pointer group relative overflow-hidden">
+              <Card onClick={handleBodyRecoveryAnalytics} className="col-span-2 bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 p-5 rounded-2xl hover:shadow-lg hover:border-orange-300 hover:-translate-y-1 transition-all duration-300 cursor-pointer group relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-orange-200/20 rounded-full -translate-y-12 translate-x-12"></div>
                 <div className="relative z-10">
                   <div className="flex items-center justify-between mb-3">
