@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import Toast from "react-hot-toast";
 import {
   ChevronLeft,
   ChevronRight,
@@ -11,7 +12,6 @@ import {
   Plus,
   Search,
   X,
-  Target,
   Camera,
   RotateCcw,
   Zap,
@@ -527,6 +527,7 @@ const FoodSection = () => {
     setSelectedFood(null);
     setServingMultiplier(1);
     setCurrentView("main");
+    Toast.success(`${food.name} added Successful!`);
   };
 
   const renderAddFoodView = () => (
