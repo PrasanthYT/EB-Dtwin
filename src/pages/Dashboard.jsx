@@ -43,7 +43,7 @@ const   HealthDashboard = () => {
   const fetchUserData = async () => {
     try {
       const token = sessionStorage.getItem("token");
-      const response = await axios.get("http://localhost:4000/api/users", {
+      const response = await axios.get("https://test-prod-f427.onrender.com/api/users", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -60,7 +60,7 @@ const   HealthDashboard = () => {
   const fetchFitbitData = async () => {
     try {
       const token = sessionStorage.getItem("token");
-      const response = await axios.get("http://localhost:4000/api/connect/fitbit/data", {
+      const response = await axios.get("https://test-prod-f427.onrender.com/api/connect/fitbit/data", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -89,19 +89,19 @@ const   HealthDashboard = () => {
 
       // Fetch heart rate data
       const heartRateResponse = await axios.get(
-        `http://localhost:4000/api/health-metrics/heart?date=${today}`,
+        `https://test-prod-f427.onrender.com/api/health-metrics/heart?date=${today}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       // Fetch steps data
       const stepsResponse = await axios.get(
-        `http://localhost:4000/api/health-metrics?date=${today}`,
+        `https://test-prod-f427.onrender.com/api/health-metrics?date=${today}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       // Fetch sleep data (you might need to adjust this endpoint)
       const sleepResponse = await axios.get(
-        `http://localhost:4000/api/sleep?date=${today}`,
+        `https://test-prod-f427.onrender.com/api/sleep?date=${today}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -192,11 +192,11 @@ const   HealthDashboard = () => {
     fetchData();
   }, []);
 
-  const email = userData?.user?.username || "";
+  const email = userData?.data?.email || "";
   const extractedName = email.split("@")[0];
-  const username = userData?.user?.name || extractedName || "User";
-  const healthScore = userData?.user?.healthData?.healthScore || "--";
-  const userId = userData?.user?.userId;
+  const username = userData?.data?.first_name || extractedName || "User";
+  const healthScore = userData?.data?.healthData?.healthScore || "86";
+  const userId = userData?.data?.userId;
 
   // ✅ Get Weekly Data
   const weeklyData = fitbitData?.data?.weeklyData || [];
@@ -249,15 +249,11 @@ const   HealthDashboard = () => {
   const heartRateZones = recentData?.activity?.summary?.heartRateZones || [];
 
   // ** Handle Navigation **
-  const handleWellnessAI = () => navigate("/wellnessai");
   const handleSearchBar = () => navigate("/search");
   const handleNavigateDP = () => navigate("/diseaseprediction");
   const handleChatBotLink = () => navigate("/chatbot");
-  const handleHeartRate = () => navigate("/heartratemonitor");
   const handleBodyRecoveryAnalytics = () => navigate("/body-recovery");
-  const handleHealthScore = () => navigate("/healthscore");
   const handleAddMeds = () => navigate("/addmeds");
-  const handleHealthBloodSugar = () => navigate("/healthbloodsugar");
   const handleGutHealthLink = () => navigate("/guthealth");
 
   const handleRemoveMed = async (medication) => {
@@ -512,7 +508,6 @@ const   HealthDashboard = () => {
             </h2>
             <Card
               className="bg-gradient-to-br from-white to-blue-50 rounded-3xl border border-blue-200 p-6 cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
-              onClick={handleHealthScore}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -563,7 +558,6 @@ const   HealthDashboard = () => {
             <div className="grid grid-cols-2 gap-4">
               {/* Heart Rate Card */}
               <Card
-                onClick={handleHeartRate}
                 className="bg-gradient-to-br from-red-500 to-red-600 text-white border-0 p-5 rounded-2xl cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
               >
                 <div className="flex items-center justify-between mb-3">
@@ -598,7 +592,6 @@ const   HealthDashboard = () => {
 
               {/* Blood Sugar Card */}
               <Card
-                onClick={handleHealthBloodSugar}
                 className="bg-gradient-to-br from-orange-500 to-orange-600 text-white border-0 p-5 rounded-2xl cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
               >
                 <div className="flex items-center justify-between mb-3">

@@ -117,7 +117,7 @@ async function fitbitOAuthCallback(req, res) {
       user_id,
     });
     const resp = await axios.patch(
-      `http://localhost:4000/api/profiles`,
+      `https://test-prod-f427.onrender.com/api/profiles`,
       {
         userId,
         hasWatch: true,
