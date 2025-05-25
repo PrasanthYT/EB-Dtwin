@@ -54,7 +54,7 @@ const HealthDashboard = () => {
   const fetchUserData = async () => {
     try {
       const token = sessionStorage.getItem("token")
-      const response = await axios.get("http://localhost:4200/api/auth/user", {
+      const response = await axios.get("http://localhost:4000/api/users", {
         headers: { Authorization: `Bearer ${token}` },
       })
 
@@ -71,7 +71,7 @@ const HealthDashboard = () => {
   const fetchFitbitData = async () => {
     try {
       const token = sessionStorage.getItem("token")
-      const response = await axios.get("http://localhost:4200/api/fitbit/get", {
+      const response = await axios.get("http://localhost:4000/api/connect/fitbit/data", {
         headers: { Authorization: `Bearer ${token}` },
       })
 
