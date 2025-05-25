@@ -3,7 +3,7 @@ const userProfileService = require("../../services/user/userProfileService");
 const { info, errorLog, warn, debug } = require("@dtwin/config");
 const { estimateCaloriesBurned } = require("@dtwin/ml-score-function");
 const timezoneUtils = require("../../common/utils/timezone");
-const API_BASE_URL = process.env.API_BASE_URL || "https://test-prod-f427.onrender.com/api";
+const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:4000/api";
 
 const createErrorResponse = (code, message, error, details = {}) => {
   errorLog(`Wearable Connect Error [${code}]: ${message}`, error);
@@ -335,7 +335,7 @@ async function fetchActivities(
     return response.data;
   } catch (error) {
     errorLog("Error fetching activities:", error.message);
-    throw error;
+    throw error.message;
   }
 }
 
@@ -365,7 +365,7 @@ async function fetchDailyData(
     return response.data;
   } catch (error) {
     errorLog("Error fetching daily data:", error.message);
-    throw error;
+    throw error.message;
   }
 }
 
@@ -430,7 +430,7 @@ async function storeSleepData(
       "Error storing sleep data:",
       error.response?.data || error.message
     );
-    throw error;
+    throw error.message;
   }
 }
 
@@ -468,7 +468,7 @@ async function storeActivitiesData(
     errorLog(
       `Error storing activities data: ${error.response?.data || error.message}`
     );
-    throw error;
+    throw error.message;
   }
 }
 
@@ -498,7 +498,7 @@ async function storeStepsData(
     return response.data;
   } catch (error) {
     errorLog("Error storing steps data:", error.message);
-    throw error;
+    throw error.message;
   }
 }
 
@@ -532,7 +532,7 @@ async function storeDistanceData(
     return response.data;
   } catch (error) {
     errorLog("Error storing distance data:", error.message);
-    throw error;
+    throw error.message;
   }
 }
 
@@ -569,7 +569,7 @@ async function storeSpO2Data(
     return response.data;
   } catch (error) {
     console.log("Error storing SpO2 data:", error.message);
-    throw error;
+    throw error.message;
   }
 }
 
@@ -626,7 +626,7 @@ async function storeHeartRateData(
       "Error storing heart rate data:",
       error.response?.data || error.message
     );
-    throw error;
+    throw error.message;
   }
 }
 
@@ -665,7 +665,7 @@ async function storeActivitySummary(
       "Error storing activity summary:",
       error.response?.data || error.message
     );
-    throw error;
+    throw error.message;
   }
 }
 
@@ -699,7 +699,7 @@ async function storeSkinTemperature(
       "Error storing skin temperature:",
       error.response?.data || error.message
     );
-    throw error;
+    throw error.message;
   }
 }
 
@@ -733,7 +733,7 @@ async function storeBreathingRate(
       "Error storing breathing rate:",
       error.response?.data || error.message
     );
-    throw error;
+    throw error.message;
   }
 }
 
@@ -780,7 +780,7 @@ async function storeHrvData(hrvDataArray, userId, accessToken, userAuthToken) {
     }
   } catch (error) {
     errorLog("Error storing HRV data:", error.response?.data || error.message);
-    throw error;
+    throw error.message;
   }
 }
 
@@ -814,7 +814,7 @@ async function storeCardioScore(
       "Error storing cardio score:",
       error.response?.data || error.message
     );
-    throw error;
+    throw error.message;
   }
 }
 
@@ -855,7 +855,7 @@ async function fetchStepsData(
   } catch (error) {
     console.log(error);
     errorLog(`Error fetching steps data: ${error}`);
-    throw error;
+    throw error.message;
   }
 }
 
@@ -895,7 +895,7 @@ async function fetchDistanceData(
     return response.data;
   } catch (error) {
     errorLog("Error fetching distance data:", error.message);
-    throw error;
+    throw error.message;
   }
 }
 
@@ -934,7 +934,7 @@ async function fetchSpO2Data(
     return response.data;
   } catch (error) {
     errorLog("Error fetching SpO2 data:", error.message);
-    throw error;
+    throw error.message;
   }
 }
 
@@ -974,7 +974,7 @@ async function fetchHeartRateData(
     return response.data;
   } catch (error) {
     errorLog("Error fetching heart rate data:", error.message);
-    throw error;
+    throw error.message;
   }
 }
 
@@ -1092,7 +1092,7 @@ async function processHealthConnectActivityData(
   } catch (error) {
     errorLog("Error processing Health Connect activity data:", error);
     info("error", error);
-    throw error;
+    throw error.message;
   }
 }
 
@@ -1123,7 +1123,7 @@ async function processHealthConnectSleepData(sleepData, userId, accessToken) {
     return null;
   } catch (error) {
     errorLog("Error processing Health Connect sleep data:", error);
-    throw error;
+    throw error.message;
   }
 }
 
@@ -1229,7 +1229,7 @@ async function validateAndTransformManualActivityData(activityData, userId) {
     return [transformedActivity];
   } catch (error) {
     errorLog("Error validating manual activity data:", error);
-    throw error;
+    throw error.message;
   }
 }
 
@@ -1257,7 +1257,7 @@ async function validateAndTransformManualSleepData(sleepData, userId) {
     };
   } catch (error) {
     errorLog("Error validating manual sleep data:", error);
-    throw error;
+    throw error.message;
   }
 }
 
@@ -1289,7 +1289,7 @@ async function processManualActivityData(activityData, userId, accessToken) {
     return null;
   } catch (error) {
     errorLog("Error processing manual activity data:", error);
-    throw error;
+    throw error.message;
   }
 }
 
@@ -1323,7 +1323,7 @@ async function processManualSleepData(sleepData, userId, accessToken) {
     return null;
   } catch (error) {
     errorLog("Error processing manual sleep data:", error);
-    throw error;
+    throw error.message;
   }
 }
 
@@ -1397,7 +1397,7 @@ async function fetchActivitySummary(
     return response.data;
   } catch (error) {
     errorLog("Error fetching activity summary:", error.message);
-    throw error;
+    throw error.message;
   }
 }
 
@@ -1441,7 +1441,7 @@ async function fetchSkinTemperature(
     return response.data;
   } catch (error) {
     errorLog("Error fetching skin temperature:", error.message);
-    throw error;
+    throw error.message;
   }
 }
 
@@ -1481,7 +1481,7 @@ async function fetchBreathingRate(
     return response.data;
   } catch (error) {
     errorLog("Error fetching breathing rate:", error.message);
-    throw error;
+    throw error.message;
   }
 }
 
@@ -1566,7 +1566,7 @@ async function fetchHrvData(
     return response.data;
   } catch (error) {
     errorLog("Error fetching HRV data:", error.message);
-    throw error;
+    throw error.message;    
   }
 }
 
@@ -1610,7 +1610,7 @@ async function fetchCardioScore(
     return response.data;
   } catch (error) {
     errorLog("Error fetching cardio score:", error.message);
-    throw error;
+    throw error.message;
   }
 }
 

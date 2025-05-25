@@ -12,6 +12,8 @@ const activityService = require("../activity/activityService");
 const MonthlyHealthMetricService = require("../user/monthlyHealthMetricService");
 const { calculateFoodScore } = require("@dtwin/ml-score-function");
 const timezoneUtils = require("../../common/utils/timezone");
+const axios = require('axios');
+const { GoogleAuth } = require('google-auth-library');
 
 /**
  * Standard error response object
@@ -962,6 +964,191 @@ async function getMetabolicScore(userId, date) {
   }
 }
 
+const AI_PLATFORM_CONFIG = {
+  projectId: process.env.GCP_PROJECT_ID || 'uplifted-woods-460815-s9',
+  endpointId: process.env.GCP_ENDPOINT_ID || '3497340879281061888',
+  location: process.env.GCP_LOCATION || 'us-central1'
+};
+
+/**
+ * Initialize Google Auth client (cached for reuse)
+ */
+let authClient = null;
+const getAuthClient = async () => {
+  if (!authClient) {
+    const auth = new GoogleAuth({
+      scopes: 'https://www.googleapis.com/auth/cloud-platform',
+    });
+    authClient = await auth.getClient();
+  }
+  return authClient;
+};
+
+/**
+ * Scan food from base64 image using Google AI Platform
+ * @param {string} base64Image - Base64 encoded image
+ * @param {Object} options - Prediction options
+ */
+async function scanFood(base64Image, options = {}) {
+  try {
+    const {
+      confidenceThreshold = 0.5,
+      maxPredictions = 5
+    } = options;
+
+    // Validate inputs
+    if (!base64Image) {
+      return createErrorResponse(
+        'MISSING_IMAGE',
+        'Base64 image is required',
+        'Missing base64Image parameter'
+      );
+    }
+
+    // Remove data URL prefix if present
+    const cleanBase64 = base64Image.replace(/^data:image\/[a-z]+;base64,/, '');
+
+    // Get authentication token
+    const client = await getAuthClient();
+    const token = await client.getAccessToken();
+
+    if (!token || !token.token) {
+      return createErrorResponse(
+        'AUTH_FAILED',
+        'Failed to authenticate with Google Cloud',
+        'Unable to obtain access token'
+      );
+    }
+
+    // Prepare the request payload
+    const payload = {
+      instances: [
+        {
+          content: cleanBase64,
+        },
+      ],
+      parameters: {
+        confidenceThreshold: confidenceThreshold,
+        maxPredictions: maxPredictions,
+      },
+    };
+
+    // Define the prediction endpoint
+    const url = `https://${AI_PLATFORM_CONFIG.location}-aiplatform.googleapis.com/v1/projects/${AI_PLATFORM_CONFIG.projectId}/locations/${AI_PLATFORM_CONFIG.location}/endpoints/${AI_PLATFORM_CONFIG.endpointId}:predict`;
+
+    info(`Making prediction request to: ${url}`);
+
+    // Make the prediction request
+    const response = await axios.post(url, payload, {
+      headers: {
+        Authorization: `Bearer ${token.token}`,
+        'Content-Type': 'application/json',
+      },
+      timeout: 30000, // 30 second timeout
+    });
+
+    // Process the response
+    const predictions = response.data.predictions || [];
+    
+    if (!predictions.length) {
+      return {
+        success: true,
+        message: "No food items detected in the image",
+        data: {
+          predictions: [],
+          detectedItems: []
+        }
+      };
+    }
+
+    // Parse and format the predictions
+    const detectedItems = predictions.flatMap(prediction => {
+      // Extract arrays from prediction
+      const displayNames = prediction.displayNames || [];
+      const confidences = prediction.confidences || [];
+      const ids = prediction.ids || [];
+      
+      // Map each item in the arrays to a detected item
+      return displayNames.map((foodName, index) => ({
+        id: ids[index] || `item-${index}`,
+        foodName,
+        confidence: confidences[index] || 0,
+        // Add additional fields if available
+        boundingBox: null // Your model doesn't seem to return bounding boxes
+      }));
+    }).filter(item => item.confidence >= confidenceThreshold);
+
+    // Sort by confidence (highest first)
+    detectedItems.sort((a, b) => b.confidence - a.confidence);
+
+    // Limit to maxPredictions
+    const limitedItems = detectedItems.slice(0, maxPredictions);
+
+    info(`Food scan completed. Detected ${limitedItems.length} items`);
+
+    return {
+      success: true,
+      message: `Successfully detected ${limitedItems.length} food item(s)`,
+      data: {
+        predictions: response.data.predictions,
+        detectedItems: limitedItems,
+        metadata: {
+          confidenceThreshold,
+          maxPredictions,
+          totalDetections: detectedItems.length,
+          filteredDetections: limitedItems.length,
+          scanTime: new Date().toISOString(),
+          modelInfo: {
+            id: response.data.deployedModelId,
+            name: response.data.modelDisplayName,
+            version: response.data.modelVersionId
+          }
+        }
+      }
+    };
+
+  } catch (error) {
+    // Handle specific error types
+    if (error.response) {
+      // Google AI Platform API error
+      const apiError = error.response.data;
+      errorLog('Google AI Platform API Error:', apiError);
+      
+      return createErrorResponse(
+        'AI_PLATFORM_ERROR',
+        'Food recognition service error',
+        error,
+        {
+          statusCode: error.response.status,
+          apiError: apiError
+        }
+      );
+    } else if (error.code === 'ECONNABORTED') {
+      // Timeout error
+      return createErrorResponse(
+        'TIMEOUT_ERROR',
+        'Food scan request timed out',
+        error
+      );
+    } else if (error.message.includes('authentication')) {
+      // Authentication error
+      return createErrorResponse(
+        'AUTH_ERROR',
+        'Authentication failed',
+        error
+      );
+    } else {
+      // General error
+      return createErrorResponse(
+        'FOOD_SCAN_ERROR',
+        'Failed to scan food image',
+        error,
+        { base64Length: base64Image?.length }
+      );
+    }
+  }
+}
+
 module.exports = {
   getDailyFoodData,
   getMonthlyFoodData,
@@ -970,4 +1157,5 @@ module.exports = {
   getDailyFoodScore,
   getMonthlyFoodScore,
   getMetabolicScore,
+  scanFood
 };
