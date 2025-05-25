@@ -47,8 +47,8 @@ const getMonthlyFoodData = async (req, res) => {
 const getFoodDataInRange = async (req, res) => {
   try {
     const userId = req.user.userId;
-    const { startDate, endDate, mealType, minCalories, maxCalories } =
-      req.query;
+    const { startDate, endDate, mealType, minCalories, maxCalories } = req.query;
+    
 
     // Validate required parameters
     if (!startDate || !endDate) {
@@ -190,6 +190,60 @@ const getMetabolicScore = async (req, res) => {
   }
 };
 
+const scanFood = async (req, res) => {
+  try {
+    const { base64Image, confidenceThreshold = 0.5, maxPredictions = 5 } = req.body;
+
+    // Validate required fields
+    if (!base64Image) {
+      return errorResponse(
+        res,
+        "Base64 image is required",
+        null,
+        400
+      );
+    }
+
+    // Validate base64 format (basic check)
+    if (!base64Image.match(/^[A-Za-z0-9+/]*={0,2}$/)) {
+      return errorResponse(
+        res,
+        "Invalid base64 image format",
+        null,
+        400
+      );
+    }
+
+    const result = await foodService.scanFood(base64Image, {
+      confidenceThreshold: parseFloat(confidenceThreshold),
+      maxPredictions: parseInt(maxPredictions)
+    });
+
+    if (!result.success) {
+      return errorResponse(
+        res,
+        result.message || "Food scan failed",
+        result.error,
+        result.statusCode || 500
+      );
+    }
+
+    successResponse(
+      res,
+      result.message || "Food scan completed successfully",
+      result.data
+    );
+  } catch (error) {
+    fatal(error);
+    errorResponse(
+      res,
+      error.message || "An error occurred during food scan",
+      process.env.NODE_ENV === "development" ? error.stack : null,
+      error.statusCode || 500
+    );
+  }
+};
+
 module.exports = {
   getDailyFoodData,
   getMonthlyFoodData,
@@ -198,4 +252,5 @@ module.exports = {
   getDailyFoodScore,
   getMonthlyFoodScore,
   getMetabolicScore,
+  scanFood
 };

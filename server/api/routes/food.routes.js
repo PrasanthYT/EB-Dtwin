@@ -23,4 +23,6 @@ router.get(
   foodController.getMetabolicScore
 );
 
+router.post("/scan", authMiddleware, foodController.scanFood);
+
 module.exports = router;
