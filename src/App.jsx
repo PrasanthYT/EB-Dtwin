@@ -28,203 +28,49 @@ import Settings from "./pages/dashboard/settings";
 import HealthBloodSugar from "./pages/dashboard/health-blood-sugar";
 import BodySimulator from "./pages/Simulation";
 import HealthVisualizationApp from "./pages/dashboard/three-d-model";
+import AISuggestionsPage from "./pages/dashboard/ai-suggestions-page";
+import FoodSection from "./pages/dashboard/food-section";
+import BottomNav from "./pages/dashboard/bottom-nav";
+import FoodScanner from "./pages/dashboard/food-scanner";
 
 // ✅ PublicRoute to prevent signed-in users from accessing auth pages
-const PublicRoute = ({ children }) => {
-  const token = sessionStorage.getItem("token");
-  return token ? <Navigate to="/dashboard" replace /> : children;
-};
+// const PublicRoute = ({ children }) => {
+//   const token = sessionStorage.getItem("token");
+//   return token ? <Navigate to="/dashboard" replace /> : children;
+// };
 
 const App = () => {
-  const [isSplashVisible, setIsSplashVisible] = useState(true);
-  const [hasVisited, setHasVisited] = useState(
-    localStorage.getItem("hasVisited")
-  );
+  // const [isSplashVisible, setIsSplashVisible] = useState(true);
+  // const [hasVisited, setHasVisited] = useState(
+  //   localStorage.getItem("hasVisited")
+  // );
 
-  // ✅ Show splash screen for 2.5 seconds before routing
-  useEffect(() => {
-    setTimeout(() => setIsSplashVisible(false), 2500);
-  }, []);
+  // // ✅ Show splash screen for 2.5 seconds before routing
+  // useEffect(() => {
+  //   setTimeout(() => setIsSplashVisible(false), 2500);
+  // }, []);
 
-  // ✅ Handle onboarding completion
-  const markOnboardingComplete = () => {
-    localStorage.setItem("hasVisited", "true");
-    setHasVisited("true");
-  };
+  // // ✅ Handle onboarding completion
+  // const markOnboardingComplete = () => {
+  //   localStorage.setItem("hasVisited", "true");
+  //   setHasVisited("true");
+  // };
 
-  // ✅ Show splash screen before routing
-  if (isSplashVisible) {
-    return <SplashScreen />;
-  }
+  // // ✅ Show splash screen before routing
+  // if (isSplashVisible) {
+  //   return <SplashScreen />;
+  // }
 
   return (
     <Router>
       <Routes>
-        <Route
-          path="/"
-          element={
-            hasVisited ? <Navigate to="/dashboard" replace /> : <StartingPage />
-          }
-        />
-        {/* Public routes */}
-        <Route
-          path="/signin"
-          element={
-            <PublicRoute>
-              <SignIn />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/signup"
-          element={
-            <PublicRoute>
-              <SignUp />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/onboarding"
-          element={
-            <PublicRoute>
-              <Onboarding />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/home"
-          element={<Home onComplete={markOnboardingComplete} />}
-        />
-
-        {/* Protected routes */}
-        <Route
-          path="/dashboard"
-          element={
-            <PrivateRoute>
-              <HealthDashboard />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            <PrivateRoute>
-              <Settings />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/healthsuggestion"
-          element={
-            <PrivateRoute>
-              <HealthSuggestions />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/healthanalysis"
-          element={
-            <PrivateRoute>
-              <HeartAnalysis />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/heartratemonitor"
-          element={
-            <PrivateRoute>
-              <HealthHeartRate />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/workoutactivitypage"
-          element={
-            <PrivateRoute>
-              <WorkoutActivityPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/mindwellnesspage"
-          element={
-            <PrivateRoute>
-              <MindWellnessPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/wellnessresourcepage"
-          element={
-            <PrivateRoute>
-              <WellnessResourcePage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/nutritionguidancepage"
-          element={
-            <PrivateRoute>
-              <NutritionGuidancePage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/Fitbit"
-          element={
-            <PrivateRoute>
-              <Fitbit />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/analytics"
-          element={
-            <PrivateRoute>
-              <HealthBloodPressure />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/weighttrack"
-          element={
-            <PrivateRoute>
-              <HealthWeightTracking />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/addmeds"
-          element={
-            <PrivateRoute>
-              <AddMeds />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/healthbloodsugar"
-          element={
-            <PrivateRoute>
-              <HealthBloodSugar />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/simulation"
-          element={
-            <PrivateRoute>
-              <BodySimulator />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/3d-model"
-          element={
-            <PrivateRoute>
-              <HealthVisualizationApp />
-            </PrivateRoute>
-          }
-        />
+        {/* Your existing routes */}
+        <Route path="/" element={<BottomNav />} />
+        
+        {/* Add this route for the food scanner */}
+        <Route path="/foodscan" element={<FoodScanner />} />
+        
+        {/* Other routes */}
       </Routes>
     </Router>
   );
