@@ -62,7 +62,7 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<FoodSection/>}/>
+        <Route path="/" element={<AISuggestionsPage/>}/>
       </Routes>
     </Router>
   );
